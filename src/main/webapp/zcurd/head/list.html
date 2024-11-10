@@ -1,0 +1,210 @@
+<#include "/common/head.html"/>
+<script type="text/javascript" src="${basePath}/res/js/ZeroClipboard/ZeroClipboard.min.js"></script>
+
+    <table id="dg"></table>
+    <div id="tb" style="padding:2px 5px;">
+        <div class="wrap_search">
+        	<span class="search_item">
+                <span class="item_text">ID: </span>
+                <span class="item_obj">
+                    <input class="easyui-textbox" type="text" name="id" />
+                </span>    
+            </span>
+            <span class="search_item">
+                <span class="item_text">表单名称: </span>
+                <span class="item_obj">
+                    <input class="easyui-textbox" type="text" name="form_name" />
+                </span>    
+            </span>
+            <span class="search_item">
+                <span class="item_text">数据库表名: </span>
+                <span class="item_obj">
+                    <input class="easyui-textbox" type="text" name="table_name" />
+                </span>    
+            </span>
+            <span class="search_item">
+                <span class="item_text">数据源:</span>
+                <span class="item_obj">
+                    <select class="easyui-combobox" name="db_source" panelHeight="auto" style="width:100px" data-options="
+                    	url: '${basePath}/common/getDictData?queryParams[dict_type]=db_source',
+                    	valueField:'dict_key',
+                		textField:'dict_value'
+                   	"></select>
+                </span>
+            </span>
+        </div>
+        <div class="dg_btns_wrap">
+            <a href="#" class="easyui-linkbutton genFormBtn" iconCls="glyphicon-flash" plain="true" onclick="genForm()">生成表单</a>
+            <a href="#" class="easyui-linkbutton updateBtn" iconCls="glyphicon-pencil" plain="true" onclick="update()">编辑</a>
+            <a href="#" class="easyui-linkbutton delBtn" iconCls="glyphicon-remove" plain="true" onclick="del()">删除</a>
+            <a href="#" class="easyui-linkbutton extendBtnBtn" iconCls="glyphicon-pushpin" plain="true" onclick="extendBtn()">扩展按钮</a>
+            <a href="#" class="easyui-linkbutton extendJsBtn" iconCls="glyphicon-paperclip" plain="true" onclick="extendJs()">扩展JS</a>
+            <a href="#" class="easyui-linkbutton genCodeBtn" iconCls="glyphicon-log-out" plain="true" onclick="genCode()">生成代码</a>
+            <div style="float:right; padding-right:40px;">
+                <a href="javascript:void(0)" class="easyui-linkbutton color1" iconCls="glyphicon-search" onclick="zcurdSearch(this)">搜索</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton color2" iconCls="glyphicon-repeat" onclick="flushPage()">重置</a>
+            </div>
+        </div>
+    </div>
+
+<script type="text/javascript">
+var datagrid = $("#dg");
+$(function() {
+	datagrid.datagrid({
+		rownumbers:true,
+    	fit:true,
+    	border:false,
+    	rownumbers:true,
+    	url:'listData',
+    	method:'post',
+    	toolbar:'#tb',
+    	pagination:true,
+    	multiSort:true,
+    	pageSize: 20,
+    	columns:[[
+	    	{field:'_', checkbox:true},
+	    	{field:'id', title: 'ID', width:60, sortable: true},
+	    	{field:'form_name', title: '表单名称', width:120, sortable: true},
+	    	{field:'table_name', title: '数据库表名', width:120, sortable: true},
+	        {field:'id_field', title: '主键字段', width:120, sortable: true},
+	        {field:'db_source', title: '数据源', width:120, sortable: true},
+	        {field:'create_time', title: '创建时间', width:130, sortable: true},
+	        {field:'operate', title: '操作', width:120, 
+	        	formatter: function(value, row, index){
+				  	return '<a class="operate" href="###" onclick="preview(' + index + ')">预览</a>' + 
+				  		   '<a class="operate" id="copyBtn' + index + '" data-clipboard-target="fe_text' + index + '" href="###">复制地址</a>'; 
+			  	} 
+	        }
+	    ]],
+	    onLoadSuccess: function(data) {
+	    	//处理复制
+	    	$.each(datagrid.datagrid("getRows"), function(i) {
+	    		copyUrl($("#copyBtn" + i).get(0), i);
+	    	});
+	    }
+	});
+});
+
+//预览
+function preview(index) {
+	var row = datagrid.datagrid("getRows")[index];
+	top.window.addMainTab("[预览]" + row.form_name, "${basePath}/zcurd/" + row.id + "/listPage");
+}
+
+//复制地址
+function copyUrl(obj, index) {
+	var row = datagrid.datagrid("getRows")[index];
+	$('#fe_text' + index).remove();
+	$('<textarea id="fe_text' + index + '"></textarea>').text("/zcurd/" + row.id + "/listPage").hide().appendTo("body");
+	var clip = new ZeroClipboard(obj, {
+  		moviePath: "${basePath}/res/js/ZeroClipboard/ZeroClipboard.swf"
+	});
+	clip.on('complete', function(client, args) {
+		showMsg("复制成功, 内容为：" + args.text)
+	});
+}
+
+//删除
+function del() {
+	var ids = [];
+	$.each(datagrid.datagrid("getSelections"), function(i, item) {
+		ids.push(item.id);
+	});
+	if(ids.length < 1) {
+		showWarnMsg("请选择需要删除的数据！");
+		return;
+	}
+	confirmMsg("确认删除？", function() {
+		$.post("delete", {id: ids}, function(data) {
+			showMsg("删除成功！");
+			datagrid.datagrid("reload");
+		});
+	});
+}
+
+/**
+ * 扩展按钮
+ */
+function extendBtn() {
+	var ids = [];
+	$.each(datagrid.datagrid("getSelections"), function(i, item) {
+		ids.push(item.id);
+	});
+	if(ids.length != 1) {
+		showWarnMsg("请选择一条数据！");
+		return;
+	}
+	top.addMainTab("扩展按钮", "${basePath}/zcurd/1/listPage?head_id=" + ids[0]);
+}
+
+/**
+ * 扩展JS
+ */
+function extendJs() {
+	var ids = [];
+	$.each(datagrid.datagrid("getSelections"), function(i, item) {
+		ids.push(item.id);
+	});
+	if(ids.length != 1) {
+		showWarnMsg("请选择一条数据！");
+		return;
+	}
+	top.addMainTab("扩展JS", "${basePath}/zcurd/2/listPage?head_id=" + ids[0]);
+}
+
+//搜索
+function zcurdSearch() {
+	var param = zcurdGetParam();
+	datagrid.datagrid("load", {
+		queryParams: param
+	})
+}
+
+function zcurdGetParam() {
+	var param = {};
+	$("#tb :input[name]").each(function(i, item) {
+		if($(item).val()) {
+			param[$(item).attr("name")] = $(item).val();	
+		}
+	});
+	return param;
+}
+
+function update() {
+	var rowsSel = datagrid.datagrid("getSelections");
+	if(rowsSel.length != 1) {
+		showWarnMsg("请选择需要编辑的一条数据！");
+		return;
+	}
+	top.window.subPage.loadCurrDatagrid = function() {
+		showMsg("更新成功！");
+		datagrid.datagrid("reload");
+	}
+	var id = rowsSel[0].id;
+	top.openWindow("编辑", "${basePath}/zcurdHead/updatePage?id=" + id, {width: 750, height: 500});
+}
+
+function genForm() {
+	top.window.subPage.loadCurrDatagrid = function() {
+		datagrid.datagrid("load");
+	}
+	top.openWindow("生成表单", "${basePath}/zcurdHead/genFormPage");
+}
+
+//生成代码
+function genCode() {
+	var rowsSel = datagrid.datagrid("getSelections");
+	if(rowsSel.length != 1) {
+		showWarnMsg("请选择一条数据！");
+		return;
+	}
+	var id = rowsSel[0].id;
+	$.post("genCode", {headId: id}, function(data) {
+		log(data);
+		showMsg(data.msg);
+	});
+}
+</script>
+
+<#include "/common/dialogWindow.html"/>
+<#include "/common/foot.html"/>

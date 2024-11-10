@@ -1,0 +1,20 @@
+package com.busi.model;
+
+import java.util.Map;
+
+import com.jfinal.plugin.activerecord.Model;
+import com.zcurd.common.DbMetaTool;
+
+public class ${className} extends Model<${className}> {
+	private static final long serialVersionUID = 1L;
+	public static final ${className} me = new ${className}();
+	<#list fieldList as item>
+		<#if item.dict_sql?? && item.dict_sql?length gt 0>
+		
+	public Map<String, Object> getDictData${item.field_name}() {
+		return DbMetaTool.getDictData("${item.dict_sql}");
+	}	
+		</#if>
+	</#list>
+	
+}

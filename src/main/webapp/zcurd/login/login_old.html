@@ -1,0 +1,64 @@
+<#include "/common/head.html"/>
+<script type="text/javascript">
+if (self != top) {  //主页不允许在iframe中
+	top.window.location.reload();
+}
+</script>
+<style type="text/css">
+.head{background: #09C; font-size: 14px; color: white; height: 50px; line-height: 50px; padding: 0px 8px; overflow: hidden;}
+.head table{border-spacing: 0px; width: 100%;}
+.head table,tr,td,th{padding: 0px;}
+.login_panel table td,th{padding: 10px;}
+</style>
+
+<div class="head"><table><tr>
+	<td width="50%" style="font-size: 14px;">ZCURD 快速开发平台</td>
+	<td width="50%" align="right" style="font-size: 12px;">欢迎登陆</td>
+</tr></table></div>
+
+<div style="position: absolute; left: 50%; top: 50%; margin-left: -200px; margin-top: -180px;">
+<div class="easyui-panel login_panel" title="欢迎登陆" style="width:400px;">
+    <div style="padding:20px 60px 20px 60px">
+    <form id="ff" class="easyui-form" method="post" action="zcurdHead/main" data-options="novalidate:true">
+        <table>
+            <tr>
+                <td>用户名:</td>
+                <td><input class="easyui-textbox" type="text" value="zcurd" name="user_name" id="user_name" data-options="required:true" style="line-height: 25px; height: 25px;"></input></td>
+            </tr>
+            <tr>
+                <td>密　码:</td>
+                <td><input class="easyui-textbox" type="password" value="123456" name="password" data-options="required:true" style="line-height: 25px; height: 25px;"></input></td>
+            </tr>
+        </table>
+	    <div style="text-align:center;padding:8px">
+	        <a href="javascript:void(0)" class="easyui-linkbutton" onclick="login()" style="width: 50px;">登 陆</a>
+	    </div>
+	    <div style="color: gray; color: #808080; padding: 8px;"><a href="###" style="color: blue" onclick="$('#user_name').textbox('setValue', 'readonly');"> readonly </a>登陆，测试只读权限</div>
+    </form>
+    </div>
+</div>
+</div>
+<script type="text/javascript">
+//回车登陆
+document.onkeydown = function() {
+    if(event.keyCode==13) {
+    	login();
+        return false;                               
+    }
+}
+
+function login() {
+	if($("#ff").form('enableValidation').form('validate')) {
+		var param = {"user_name":$(":input[name='user_name']").val(), "password":$(":input[name='password']").val()};
+		$.post("${basePath}/login/login", param, function(data) {
+			if(data.result == "success") {
+				$('#ff').submit();
+				location.href = "main";
+			}else {
+				showWarnMsg(data.msg);
+			}
+		});
+	}
+}
+</script>
+<#include "/common/foot.html"/>

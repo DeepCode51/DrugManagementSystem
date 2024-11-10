@@ -1,0 +1,169 @@
+package com.busi.controller;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import com.jfinal.plugin.activerecord.Record;
+import com.busi.model.${className};
+import com.zcurd.common.DBTool;
+import com.zcurd.common.DbMetaTool;
+import com.zcurd.common.StringUtil;
+import com.zcurd.controller.BaseController;
+import com.zcurd.ext.render.csv.CsvRender;
+
+/**
+ * ${head.form_name}
+ */
+public class ${className}Controller extends BaseController {
+	
+	public void listPage() {
+		<#list updateFieldList as item>
+			<#if item.dict_sql?? && item.dict_sql?length gt 0>
+		setAttr("dictData${item.field_name}", ${className}.me.getDictData${item.field_name}());
+			</#if>
+		</#list>
+		render("list.html");
+	}
+	
+	public void listData() {
+		Object[] queryParams = getQueryParams();
+		String[] properties = (String[]) queryParams[0];
+		String[] symbols = (String[]) queryParams[1];
+		Object[] values = (Object[]) queryParams[2];
+		
+		String orderBy = getOrderBy();
+		if(StringUtil.isEmpty(orderBy)) {
+			orderBy = "${head.id_field} desc";
+		}
+		
+		List<Record> list = DBTool.findByMultPropertiesDbSource("${head.db_source}", "${head.table_name}", properties, symbols, values, orderBy, getPager());
+		<#list fieldList as item>
+			<#if item.is_show_list == 1 && item.dict_sql?? && item.dict_sql?length gt 0>
+		Map<String, Object> dictData${item.field_name} = ${className}.me.getDictData${item.field_name}();
+		for(Record record : list) {
+			String fieldName = "${item.field_name}";
+			if(record.get(fieldName) != null && dictData${item.field_name}.get(record.get(fieldName).toString()) != null) {
+				record.set(fieldName, dictData${item.field_name}.get(record.get(fieldName).toString()));
+			}
+		}
+			</#if>
+		</#list>
+		
+		renderDatagrid(
+			list, 
+			DBTool.countByMultPropertiesDbSource("${head.db_source}", "${head.table_name}", properties, symbols, values)
+		);
+	}
+	
+	//增加页面
+	public void addPage() {
+		<#list updateFieldList as item>
+			<#if item.dict_sql?? && item.dict_sql?length gt 0>
+		setAttr("dictData${item.field_name}", ${className}.me.getDictData${item.field_name}());
+			</#if>
+		</#list>
+		render("add.html");
+	}
+	
+	//增加
+	public void add() {
+		getModel(${className}.class, "model").save();
+		
+		addOpLog("[${head.form_name}] 增加");
+		renderSuccess();
+	}
+	
+	//修改页面
+	public void updatePage() {
+		<#list updateFieldList as item>
+			<#if item.dict_sql?? && item.dict_sql?length gt 0>
+		setAttr("dictData${item.field_name}", ${className}.me.getDictData${item.field_name}());
+			</#if>
+		</#list>
+		setAttr("model", ${className}.me.findById(getPara("${head.id_field}")));
+		render("update.html");
+	}
+	
+	//修改
+	public void update() {
+		${className} model = ${className}.me.findById(getPara("${head.id_field}"));
+<#list updateFieldList as item>
+	<#if item.is_allow_update == 1>
+		model.set("${item.field_name}", getPara("model.${item.field_name}"));
+	</#if>
+</#list>		
+		model.update();
+		addOpLog("[${head.form_name}] 修改");
+		renderSuccess();
+	}
+	
+	//删除
+	public void delete() {
+		Integer[] ids = getParaValuesToInt("id[]");
+		for (Integer id : ids) {
+			new ${className}().set("${head.id_field}", id).delete();
+			
+		}
+		
+		addOpLog("[${head.form_name}] 删除");
+		renderSuccess();
+	}
+	
+	//详情页面
+	public void detailPage() {
+		${className} model = ${className}.me.findById(getParaToInt("id"));
+		<#list updateFieldList as item>
+			<#if item.dict_sql?? && item.dict_sql?length gt 0>
+		Map<String, Object> dictData${item.field_name} = ${className}.me.getDictData${item.field_name}();
+		if(dictData${item.field_name}.get(model.get("${item.field_name}").toString()) != null) {
+			model.set("${item.field_name}", dictData${item.field_name}.get(model.get("${item.field_name}").toString()));
+		}
+			</#if>
+		</#list>
+		setAttr("model", model);
+		render("detail.html");
+	}
+	
+	//导出csv
+	public void exportCsv() {
+		Object[] queryParams = getQueryParams();
+		String[] properties = (String[]) queryParams[0];
+		String[] symbols = (String[]) queryParams[1];
+		Object[] values = (Object[]) queryParams[2];
+		
+		String orderBy = getOrderBy();
+		if(StringUtil.isEmpty(orderBy)) {
+			orderBy = "${head.id_field} desc";
+		}
+		
+		List<Record> list = DBTool.findByMultPropertiesDbSource("${head.db_source}", "${head.table_name}", properties, symbols, values);
+		<#list fieldList as item>
+			<#if item.is_show_list == 1 && item.dict_sql?? && item.dict_sql?length gt 0>
+		Map<String, Object> dictData${item.field_name} = ${className}.me.getDictData${item.field_name}();
+		for(Record record : list) {
+			String fieldName = "${item.field_name}";
+			if(dictData${item.field_name}.get(record.get(fieldName).toString()) != null) {
+				record.set(fieldName, dictData${item.field_name}.get(record.get(fieldName).toString()));
+			}
+		}
+			</#if>
+		</#list>
+		
+		List<String> headers = new ArrayList<String>();
+		List<String> clomuns = new ArrayList<String>();
+		<#list updateFieldList as item>
+			<#if item.is_allow_update == 1>
+		headers.add("${item.column_name}");
+		clomuns.add("${item.field_name}");
+			</#if>
+		</#list>
+		
+		CsvRender csvRender = new CsvRender(headers, list);
+		csvRender.clomuns(clomuns);
+		csvRender.fileName("${head.form_name}");
+		
+		addOpLog("[${head.form_name}] 导出cvs");
+		render(csvRender);
+	}
+}

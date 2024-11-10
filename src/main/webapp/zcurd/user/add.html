@@ -1,0 +1,50 @@
+<#include "/common/head.html"/>    
+<div id="zcurdHeadTable" class="easyui-panel" data-options="fit:true,border:false,novalidate:true">
+    <div style="padding:0px">
+    <form class="easyui-form" id="ff" method="post" data-options="novalidate:true">
+        <table cellpadding="5" width="100%">
+            <tr>
+           		<th><span>用户名：</span></th>
+               	<td>
+               			<input class="easyui-textbox" type="text" name="user_name" value="" data-options="" style="width: 130px;"></input>
+           		</td>
+            <tr>
+           		<th><span>密码：</span></th>
+               	<td>
+               			<input class="easyui-textbox" type="text" name="password" value="" data-options="" style="width: 130px;"></input>
+           		</td>
+           		
+            </tr>
+            </tr>
+        </table>
+    </form>
+    </div>
+</div>
+<script>
+top.window.subPage.save = save;
+function save(successFunc) {
+	if($("#ff").form('enableValidation').form('validate')) {
+		$.post("add", getParam(), function(data) {
+			if(successFunc) {
+				successFunc();
+			}
+			top.window.closeWindow();
+			top.window.subPage.loadCurrDatagrid();
+		});
+	}
+}
+function getParam() {
+	var param = {
+   	    "model.user_name": $(":input[name='user_name']").val(), 
+   		"model.password": $(":input[name='password']").val(), 
+	}
+	for(key in param) {
+		if(!param[key]) {
+			delete param[key];
+		}
+	}
+	return param;
+}
+
+</script>
+<#include "/common/foot.html"/>

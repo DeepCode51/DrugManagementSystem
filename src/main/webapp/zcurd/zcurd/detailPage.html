@@ -1,0 +1,57 @@
+<#include "/common/head.html"/>
+
+<#-- 计算table列数 -->
+<#assign columnSize=head.dialog_size?split("x")[0]?number />
+<#if columnSize lt 700>
+	<#assign columnSize=1 />
+<#else>
+	<#assign columnSize=2 />
+</#if>
+
+<#escape x as x?html><#-- 安全输出 -->
+ <div class="easyui-panel detailPage<#if columnSize gt 1> multiple</#if>" data-options="fit:true,border:false">
+    <form id="ff" class="easyui-form" method="post">
+        <table class="table1">
+           	<#list updateFieldList as item>
+           		<#if item_index == 0 || (item_index + 0) % columnSize == 0>
+            <tr>
+           		</#if>
+           		<th><span id="${item.field_name}_label">${item.column_name}：</span></th>
+           		<#if item.input_type == 'easyui-filebox_img' && model[item.field_name]??>
+           			<td><div class="valueSpan image_pre"><img src="${basePath}${model[item.field_name]!''}"></div></td>
+           		<#else>
+	               	<td><span class="valueSpan"><pre>${model[item.field_name]!''}</pre></span></td>
+           		</#if>
+           		<#if item_index != 0 && (item_index + 1) % columnSize == 0>
+            </tr>
+           		</#if>
+           	</#list>
+           	
+           	<#if updateFieldList.size() % columnSize != 0>
+           		<#if (columnSize - updateFieldList.size() % columnSize) == 1>
+                <td colspan="2"></td>
+	           	</#if>
+	           	<#if (columnSize - updateFieldList.size() % columnSize) == 2>
+                <td colspan="2"></td>
+                <td colspan="2"></td>
+	           	</#if>
+            </tr>
+           	</#if>
+        </table>
+    </form>
+</div>
+</#escape>
+<script>
+top.window.subPage.save = save;
+function save() {
+	top.window.closeWindow();
+}
+
+//扩展js
+<#list jsList as item>
+	<#if item.page?contains("detail")>
+	${item.jsContentData!item.js_content}
+	</#if>
+</#list>
+</script>
+<#include "/common/foot.html"/>

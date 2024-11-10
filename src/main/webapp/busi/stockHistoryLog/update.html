@@ -1,0 +1,129 @@
+
+<#include "/common/head.html"/>
+
+ <div class="easyui-panel updatePage" data-options="fit:true,border:false">
+    <form id="ff" class="easyui-form" method="post">
+        <table class="table1">
+        	
+            <tr>
+           		<th><span>日期：</span></th>
+               	<td>
+               		<input class="easyui-datebox" type="text" name="dt" value="${model.dt!''}" data-options=""></input>
+           		</td>
+           		
+           		<th><span>股票代码：</span></th>
+               	<td>
+               		<input class="easyui-textbox" type="text" name="code" value="${model.code!''}" data-options=""></input>
+           		</td>
+           		
+            </tr>
+            <tr>
+           		<th><span>名称：</span></th>
+               	<td>
+               		<input class="easyui-textbox" type="text" name="name" value="${model.name!''}" data-options=""></input>
+           		</td>
+           		
+           		<th><span>收盘价：</span></th>
+               	<td>
+               		<input class="easyui-textbox" type="text" name="closing_price" value="${model.closing_price!''}" data-options=""></input>
+           		</td>
+           		
+            </tr>
+            <tr>
+           		<th><span>最高价：</span></th>
+               	<td>
+               		<input class="easyui-textbox" type="text" name="top_price" value="${model.top_price!''}" data-options=""></input>
+           		</td>
+           		
+           		<th><span>最低价：</span></th>
+               	<td>
+               		<input class="easyui-textbox" type="text" name="minimum_price" value="${model.minimum_price!''}" data-options=""></input>
+           		</td>
+           		
+            </tr>
+            <tr>
+           		<th><span>开盘价：</span></th>
+               	<td>
+               		<input class="easyui-textbox" type="text" name="opening_price" value="${model.opening_price!''}" data-options=""></input>
+           		</td>
+           		
+           		<th><span>前收盘：</span></th>
+               	<td>
+               		<input class="easyui-textbox" type="text" name="pre" value="${model.pre!''}" data-options=""></input>
+           		</td>
+           		
+            </tr>
+            <tr>
+           		<th><span>涨跌额：</span></th>
+               	<td>
+               		<input class="easyui-textbox" type="text" name="change_amount" value="${model.change_amount!''}" data-options=""></input>
+           		</td>
+           		
+           		<th><span>涨跌幅：</span></th>
+               	<td>
+               		<input class="easyui-textbox" type="text" name="change_ratio" value="${model.change_ratio!''}" data-options=""></input>
+           		</td>
+           		
+            </tr>
+            <tr>
+           		<th><span>成交量：</span></th>
+               	<td>
+               		<input class="easyui-textbox" type="text" name="turnover_volume" value="${model.turnover_volume!''}" data-options=""></input>
+           		</td>
+           		
+           		<th><span>成交金额：</span></th>
+               	<td>
+               		<input class="easyui-textbox" type="text" name="turnover_money" value="${model.turnover_money!''}" data-options=""></input>
+           		</td>
+           		
+            </tr>
+            <tr>
+           		<th><span>创建时间：</span></th>
+               	<td>
+               		<input class="easyui-textbox" type="text" name="create_time" value="${model.create_time!''}" data-options="required:true"></input>
+           		</td>
+           		
+                <td colspan="2"></td>
+            </tr>
+        </table>
+    </form>
+</div>
+<script>
+top.window.subPage.save = save;
+function save() {
+	if($("#zcurdHeadTable").form('validate')) {
+		$.post("update", getParam(), function(data) {
+			top.window.closeWindow();
+			top.window.subPage.loadCurrDatagrid();
+		});
+	}
+}
+function getParam() {
+	var param = {
+	     
+	    "id": ${model.id}, 
+       	    "model.dt": getInputValue("dt"), 
+       	    "model.code": getInputValue("code"), 
+       	    "model.name": getInputValue("name"), 
+       	    "model.closing_price": getInputValue("closing_price"), 
+       	    "model.top_price": getInputValue("top_price"), 
+       	    "model.minimum_price": getInputValue("minimum_price"), 
+       	    "model.opening_price": getInputValue("opening_price"), 
+       	    "model.pre": getInputValue("pre"), 
+       	    "model.change_amount": getInputValue("change_amount"), 
+       	    "model.change_ratio": getInputValue("change_ratio"), 
+       	    "model.turnover_volume": getInputValue("turnover_volume"), 
+       	    "model.turnover_money": getInputValue("turnover_money"), 
+       	    "model.create_time": getInputValue("create_time"), 
+	}
+	for(key in param) {
+		if(!param[key]) {
+			delete param[key];
+		}
+	}
+	return param;
+}
+
+//扩展js
+</script>
+<#include "/common/foot.html"/>

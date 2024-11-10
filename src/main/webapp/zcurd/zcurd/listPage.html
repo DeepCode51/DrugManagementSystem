@@ -1,0 +1,245 @@
+<#include "/common/head.html"/>
+<#if head.form_type == 2>
+<div id="subLayout" class="easyui-layout" data-options="fit:true, border:false">
+	<div data-options="region:'center', border:false">
+</#if>
+    
+    <table id="dg"></table>
+    <div id="tb" style="padding:2px 5px;">
+        <div class="wrap_search">
+        	<#list fieldList as item>
+	         	<#if item.is_search == 1>
+		            <#if item.dict??>
+		            	<span class="search_item">
+			            	<span class="item_text">${item.column_name}: </span>
+			            	<span class="item_obj">
+			            		<input class="easyui-combobox" name="${item.field_name}" id="${item.field_name}" value="${queryPara[item.field_name!]!}" style="width:100px" data-options="
+			            				valueField: 'id',
+        								textField: 'text',
+			            				data: [
+			            					{id:'', text:''}<#list item.dict.keySet() as key>,{id:'${key}', text:'${item.dict.get(key)}'}</#list>
+			            				]
+			            			" />
+			            	</span>    
+			            </span>
+			        <#else>
+			        	<#assign easyui_type="easyui-textbox" />
+			        	<#if item.data_type=='timestamp' || item.data_type=='datetime' || item.data_type=='date'>
+			        		<#assign easyui_type="easyui-datebox" />
+		        		</#if>
+		        		
+			        	<#if item.search_type == 2>
+			        		<span class="search_item search_between">
+				                <span class="item_text">${item.column_name}: </span>
+				                <span class="item_obj">
+				                    <input class="${easyui_type}" name="_start_${item.field_name}" id="_start_${item.field_name}" value="${queryPara[item.field_name!]!}"/> ～ <input class="${easyui_type}" name="_end_${item.field_name}" id="_end_${item.field_name}" value="${queryPara[item.field_name!]!}"/>
+				                </span>
+				            </span>
+			            <#else>
+			            	<span class="search_item">
+				            	<span class="item_text">${item.column_name}: </span>
+				            	<span class="item_obj">
+				            		<input class="${easyui_type}" type="text" name="${item.field_name}" id="${item.field_name}" value="${queryPara[item.field_name!]!}"/>
+				            	</span>    
+				            </span>
+			        	</#if>
+		            </#if>
+	         	</#if>
+          	</#list>
+        </div>
+        <div class="dg_btns_wrap">
+            <#if zcurd.isIncludeFunc(head.include_func, "add")><a href="javascript:void(0)" class="easyui-linkbutton addBtn" iconCls="glyphicon-plus" plain="true" onclick="add()">增加</a></#if>
+            <#if zcurd.isIncludeFunc(head.include_func, "update")><a href="javascript:void(0)" class="easyui-linkbutton updateBtn" iconCls="glyphicon-pencil" plain="true" onclick="update()">编辑</a></#if>
+            <#if zcurd.isIncludeFunc(head.include_func, "delete")><a href="javascript:void(0)" class="easyui-linkbutton delBtn" iconCls="glyphicon-remove" plain="true" onclick="del()">删除</a></#if>
+            <#if zcurd.isIncludeFunc(head.include_func, "detail")><a href="javascript:void(0)" class="easyui-linkbutton detailBtn" iconCls="glyphicon-map-marker" plain="true" onclick="detail()">详情</a></#if>
+            <#if zcurd.isIncludeFunc(head.include_func, "export")><a href="javascript:void(0)" class="easyui-linkbutton exportBtn" iconCls="glyphicon-export" plain="true" onclick="exportCsv()">导出</a></#if>
+            <#list topList as item>
+            <a href="#" class="easyui-linkbutton exBtn${item.id}" iconCls="${item.btn_icon!''}" plain="true" onclick="btnClick${item.id}(' + index + ')">${item.btn_name}</a>
+         	</#list>
+            <div id="searchBtnWrap" style="float:right; padding-right:40px;">
+                <a href="javascript:void(0)" class="easyui-linkbutton color1" iconCls="glyphicon-search" onclick="zcurdSearch(this)">搜索</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton color2" iconCls="glyphicon-repeat" onclick="flushPage()">重置</a>
+            </div>
+        </div>
+    </div>
+    
+<#if head.form_type == 2>
+    </div>
+    <div data-options="region:'east',split:true, border:false, collapsed:true, width:window.subPageWidth||'40%', title:window.subPageTitle||'子页面', onCollapse: function(){_openSubPageFlag=false;}">
+    	<iframe id="subIframe" class="easyui-panel" data-options="fit:true,border:false"></iframe>
+    </div>
+</div> 
+</#if>
+
+<script type="text/javascript">
+var datagrid = $("#dg");
+
+var dgOptions = {
+        rownumbers:true,
+    	fit:true,
+    	border:false,
+        rownumbers:true,
+    	url:'listData',
+    	method:'post',
+    	toolbar:'#tb',
+    	pageSize: 20,
+    	pagination:true,
+    	multiSort:false,
+    	ctrlSelect:true,
+		sortName: getInitParam().sort,
+    	sortOrder: getInitParam().order,
+        queryParams: getInitParam(),
+        <#if footerFieldList.size() gt 0>showFooter: true, </#if>
+        columns: [[
+		         {field:'${head.id_field}', checkbox:true}
+				 <#list fieldList as item>
+	           	 <#if item.is_show_list == 1 && item.field_name != head.id_field>
+	           	 ,{field:'${item.field_name}', title: '${item.column_name}', width:${item.column_length}, sortable: true <#if item.input_type == 'easyui-filebox_img'>,formatter: function(value){return formatterDgImage(value)}</#if>}
+	           	 </#if>
+	             </#list>
+	             <#if lineList.size() gt 0>
+	         	,{field:'operate', title: '操作', width: window.operateWidth || 120, 
+	             	formatter: function(value, row, index){
+	             		var html = "";
+	             		<#list lineList as item>
+	             		html += '<a class="operate" href="###" onclick="btnClick${item.id}(' + index + ')">${item.btn_name}</a>';
+	             		</#list>
+	     			  	return html;
+	     		  	} 
+	             }
+	         	</#if>
+	           ]],
+	           loadFilter: function(data) {
+	        	   if(data.result && data.result == 'fail') {	//失败时，错误消息提示
+	        		   showWarnMsg(data.msg);
+	        		   return {};
+	        	   }else {
+	        		   return data;
+	        	   }
+	           }           
+	};
+$(function() {
+	handleAuthDataRule();
+	datagrid.datagrid(dgOptions);
+});
+
+function zcurdSearch() {
+	var param = zcurdGetParam();
+	datagrid.datagrid("load", {
+		queryParams: param
+	})
+}
+
+function zcurdGetParam() {
+	var param = {};
+	$("#tb :input[name]").each(function(i, item) {
+		if($(item).val()) {
+			param[$(item).attr("name")] = $(item).val();	
+		}
+	});
+	return param;
+}
+
+function getInitParam() {
+	var param = {};
+	$("#tb :input[name]").each(function(i, item) {
+		if($(item).val()) {
+			param["queryParams[" + $(item).attr("name") + "]"] = $(item).val();	
+		}
+	});
+	if("${sort!''}") {
+		param.sort = "${sort!''}";
+		param.order = "${order!'asc'}";
+	}
+	return param;
+}
+
+var initPara = zcurdGetParam();
+function add() {
+	top.window.subPage.loadCurrDatagrid = function() {
+		showMsg("增加成功！");
+		datagrid.datagrid("load");
+	}
+	top.openWindow("${head.form_name}-增加", getCurrUrl("addPage") + "?" + $.param(initPara), {size: '${head.dialog_size!}'});
+}
+
+function update() {
+	var rowsSel = datagrid.datagrid("getSelections");
+	if(rowsSel.length != 1) {
+		showWarnMsg("请选择需要编辑的一条数据！");
+		return;
+	}
+	var id = rowsSel[0].${head.id_field};
+	top.window.subPage.loadCurrDatagrid = function() {
+		showMsg("更新成功！");
+		datagrid.datagrid("reload");
+	}
+	top.openWindow("${head.form_name}-编辑", getCurrUrl("updatePage") + "?id=" + id, {size: '${head.dialog_size!}'});
+}
+
+function del() {
+	var ids = [];
+	$.each(datagrid.datagrid("getSelections"), function(i, item) {
+		ids.push(item.${head.id_field});
+	});
+	if(ids.length < 1) {
+		showWarnMsg("请选择需要删除的数据！");
+		return;
+	}
+	confirmMsg("确认删除？", function() {
+		$.post("delete", {id: ids}, function(data) {
+			showMsg("删除成功！");
+			datagrid.datagrid("reload");
+		});
+	});
+}
+
+function detail() {
+	var rowsSel = datagrid.datagrid("getSelections");
+	if(rowsSel.length != 1) {
+		showWarnMsg("请选择需要查看的一条数据！");
+		return;
+	}
+	var id = rowsSel[0].${head.id_field};
+	top.openWindow("${head.form_name}-详情", getCurrUrl("detailPage") + "?id=" + id, {size: '${head.dialog_size!}'});
+}
+
+function exportCsv() {
+	var option = datagrid.datagrid("options");
+	var param = option.queryParams;
+	param.sortName = option.sortName;
+	param.sortOrder = option.sortOrder;
+	window.location.href = "exportCsv?" + $.param(param);
+}
+
+//按钮事件
+<#list btnList as item>
+window.btnClick${item.id} = ${item.func_content};
+</#list>
+
+/**
+ * 打开子页
+ */
+var _openSubPageFlag = false;
+function _openSubPage(pageUrl) {
+	if(!_openSubPageFlag) {
+		$("#subLayout").layout("expand", "east");
+		setTimeout(function() {
+			$("#subIframe").attr("src", pageUrl);
+		}, 600);
+		_openSubPageFlag = true;
+	}else {
+		$("#subIframe").attr("src", pageUrl);
+	}
+}
+
+//扩展js
+<#list jsList as item>
+	<#if item.page?contains("list")>
+	${item.jsContentData!item.js_content}
+	</#if>
+</#list>
+</script>
+
+<#include "/common/dialogWindow.html"/>
+<#include "/common/foot.html"/>

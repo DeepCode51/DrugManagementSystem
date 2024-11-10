@@ -1,0 +1,72 @@
+
+<#include "/common/head.html"/>
+ <div class="easyui-panel detailPage" data-options="fit:true,border:false">
+    <form id="ff" class="easyui-form" method="post">
+        <table class="table1">
+        	
+        		
+            <tr>
+           		<th><span>日期：</span></th>
+               	<td><span class="valueSpan">${model[item.field_name]!''}</span></td>
+        		
+           		<th><span>股票代码：</span></th>
+               	<td><span class="valueSpan">${model[item.field_name]!''}</span></td>
+            </tr>
+        		
+            <tr>
+           		<th><span>名称：</span></th>
+               	<td><span class="valueSpan">${model[item.field_name]!''}</span></td>
+        		
+           		<th><span>收盘价：</span></th>
+               	<td><span class="valueSpan">${model[item.field_name]!''}</span></td>
+            </tr>
+        		
+            <tr>
+           		<th><span>最高价：</span></th>
+               	<td><span class="valueSpan">${model[item.field_name]!''}</span></td>
+        		
+           		<th><span>最低价：</span></th>
+               	<td><span class="valueSpan">${model[item.field_name]!''}</span></td>
+            </tr>
+        		
+            <tr>
+           		<th><span>开盘价：</span></th>
+               	<td><span class="valueSpan">${model[item.field_name]!''}</span></td>
+        		
+           		<th><span>前收盘：</span></th>
+               	<td><span class="valueSpan">${model[item.field_name]!''}</span></td>
+            </tr>
+        		
+            <tr>
+           		<th><span>涨跌额：</span></th>
+               	<td><span class="valueSpan">${model[item.field_name]!''}</span></td>
+        		
+           		<th><span>涨跌幅：</span></th>
+               	<td><span class="valueSpan">${model[item.field_name]!''}</span></td>
+            </tr>
+        		
+            <tr>
+           		<th><span>成交量：</span></th>
+               	<td><span class="valueSpan">${model[item.field_name]!''}</span></td>
+        		
+           		<th><span>成交金额：</span></th>
+               	<td><span class="valueSpan">${model[item.field_name]!''}</span></td>
+            </tr>
+        		
+            <tr>
+           		<th><span>创建时间：</span></th>
+               	<td><span class="valueSpan">${model[item.field_name]!''}</span></td>
+                <td colspan="2"></td>
+            </tr>
+        </table>
+    </form>
+</div>
+<script>
+top.window.subPage.save = save;
+function save() {
+	top.window.closeWindow();
+}
+
+//扩展js
+</script>
+<#include "/common/foot.html"/>

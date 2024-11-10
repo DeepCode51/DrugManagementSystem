@@ -1,0 +1,77 @@
+
+<#include "/common/head.html"/>
+
+
+ <div class="easyui-panel addPage" data-options="fit:true,border:false,novalidate:true">
+    <form class="easyui-form" id="ff" method="post" data-options="novalidate:true">
+        <table class="table1">
+            <tr>
+           		<th><span id="name_label">名称：</span></th>
+               	<td>
+               		<div class="wrap_input"><input class="easyui-textbox" type="text" name="name" id="name" value="" data-options="fit: true,required:true"></input></div>
+           		</td>
+            <tr>
+           		<th><span id="target_type_label">任务类型：</span></th>
+               	<td>
+	            	<div class="wrap_input"><input class="easyui-combobox" id="target_type" name="target_type" value="" data-options="
+	            				valueField: 'id',
+   								textField: 'text',
+   								fit: true,
+	            				data: [
+	            					{id:'', text:''}<#list dictDatatarget_type.keySet() as key>,{id:'${key}', text:'${dictDatatarget_type.get(key)}'}</#list>
+	            				]
+	            				,required:true
+	            	" /></div>        	
+           		</td>
+            </tr>
+            <tr>
+           		<th><span id="target_value_label">任务值：</span></th>
+               	<td>
+           			<div class="wrap_input textarea"><textarea name="target_value" id="target_value" class="easyui-validatebox" data-options="required:true" rows="5" placeholder="多行用英文“;”隔开"></textarea></div>
+           		</td>
+            </tr>
+            <tr>
+           		<th><span id="cron_label">cron表达式：</span></th>
+               	<td>
+               		<div class="wrap_input"><input class="textbox-text easyui-validatebox" data-options="required:true" type="text" name="cron" id="cron" onclick='top.window.openPopup(this, "参考执行时间表达式", "/zcurd/common/taskPage", {width: 445, height: 300})'></input></div>
+           		</td>
+            </tr>
+        </table>
+    </form>
+</div>
+<script>
+top.window.subPage.save = save;
+function save() {
+	if($("#ff").form('enableValidation').form('validate')) {
+		$.post("add", getParam(), function(data) {
+			top.window.closeWindow();
+			top.window.subPage.loadCurrDatagrid();
+		});
+	}
+}
+function getParam() {
+	var param = {
+       		"model.name": getInputValue("name"), 
+       		"model.target_type": getInputValue("target_type"), 
+       		"model.target_value": getInputValue("target_value"), 
+       		"model.cron": getInputValue("cron"), 
+       		"model.status": getInputValue("status")
+	}
+	for(key in param) {
+		if(!param[key]) {
+			delete param[key];
+		}
+	}
+	return param;
+}
+
+$(document).click(function() {
+	var target = event.target || event.srcElement;
+	if($(target).attr("name") != 'cron') {
+		top.window.closePopup();
+	}
+});
+
+//扩展js
+</script>
+<#include "/common/foot.html"/>

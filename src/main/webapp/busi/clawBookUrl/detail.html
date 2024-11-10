@@ -1,0 +1,42 @@
+
+<#include "/common/head.html"/>
+ <div class="easyui-panel detailPage" data-options="fit:true,border:false">
+    <form id="ff" class="easyui-form" method="post">
+        <table class="table1">
+        	
+        		
+            <tr>
+           		<th><span>来源：</span></th>
+               	<td><span class="valueSpan">${model.source!''}</span></td>
+        		
+           		<th><span>书名：</span></th>
+               	<td><span class="valueSpan">${model.book_name!''}</span></td>
+            </tr>
+        		
+            <tr>
+           		<th><span>阅读地址：</span></th>
+               	<td><span class="valueSpan">${model.url!''}</span></td>
+        		
+           		<th><span>状态：</span></th>
+               	<td><span class="valueSpan">${model.status!''}</span></td>
+            </tr>
+        		
+            <tr>
+           		<th><span>创建时间：</span></th>
+               	<td><span class="valueSpan">${model.create_time!''}</span></td>
+        		
+           		<th><span>最后更新时间：</span></th>
+               	<td><span class="valueSpan">${model.last_update_time!''}</span></td>
+            </tr>
+        </table>
+    </form>
+</div>
+<script>
+top.window.subPage.save = save;
+function save() {
+	top.window.closeWindow();
+}
+
+//扩展js
+</script>
+<#include "/common/foot.html"/>

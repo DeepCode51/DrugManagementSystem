@@ -1,0 +1,105 @@
+<#include "/common/head.html"/>
+
+<#-- 计算table列数 -->
+<#assign columnSize=head.dialog_size?split("x")[0]?number />
+<#if columnSize lt 700>
+	<#assign columnSize=1 />
+<#else>
+	<#assign columnSize=2 />
+</#if>
+
+ <div class="easyui-panel addPage<#if columnSize gt 1> multiple</#if>" data-options="fit:true,border:false,novalidate:true">
+    <form class="easyui-form" id="ff" method="post" data-options="novalidate:true">
+        <table class="table1">
+        <#list addFieldList as item>
+           	<#if item_index == 0 || (item_index + 0) % columnSize == 0>
+            <tr>
+           	</#if>
+           		<th><span id="${item.field_name}_label">${item.column_name}：</span></th>
+               	<td>
+            <#if item.input_type == 'easyui-combobox'>
+	            	<div class="wrap_input"><input class="easyui-combobox" id="${item.field_name}" name="${item.field_name}" value="${queryPara[item.field_name!]!}" data-options="
+	            				valueField: 'id',
+   								textField: 'text',
+   								fit: true,
+	            				data: [
+	            					{id:'', text:''}<#list item.dict.keySet() as key>,{id:'${key}', text:'${item.dict.get(key)}'}</#list>
+	            				]
+	            				<#if item.is_allow_null==0>,required:true</#if>
+	            	" /></div>        	
+			<#elseif item.input_type == 'easyui-filebox_img'>	
+			        <div class="wrap_input"><input class="easyui-filebox" type="text" name="${item.field_name}" id="${item.field_name}" data-options="fit: true<#if item.is_allow_null==0>,required:true</#if>,buttonText: '选择图片', accept1: 'image/*', onChange: function(){uploadFile('${item.field_name}')}"></input></div>
+					<div class="image_pre"><img id="${item.field_name}Img" src=""></div>
+			<#elseif item.input_type == 'textarea'>	
+			        <div class="wrap_input textarea"><textarea name="${item.field_name}" id="${item.field_name}" class="easyui-validatebox" data-options="<#if item.is_allow_null==0>required:true</#if>" rows="5"></textarea></div>
+			<#elseif item.input_type == 'icon'>	
+              		<div class="wrap_input"><input class="easyui-validatebox ${item.input_type}" data-options="<#if item.is_allow_null==0>required:true</#if>" type="text" name="${item.field_name}" id="${item.field_name}" onclick='top.window.openPopup(this, "请选择图标", "${basePath}/common/iconsPage", {width: 540, height: 400})'></input></div>
+            <#else>
+               		<div class="wrap_input"><input class="${item.input_type}" type="text" name="${item.field_name}" id="${item.field_name}" value="${queryPara[item.field_name!]!(item.default_value!)}" data-options="fit: true<#if item.is_allow_null==0>,required:true</#if>"></input></div>
+			</#if>
+           		</td>
+           	<#if item_index != 0 && (item_index + 1) % columnSize == 0>
+            </tr>
+           	</#if>
+        </#list>
+        <#if addFieldList.size() % columnSize != 0>
+           	<#if (columnSize - addFieldList.size() % columnSize) == 1>
+            <td colspan="2"></td>
+	        </#if>
+	        <#if (columnSize - addFieldList.size() % columnSize) == 2>
+                <td colspan="2"></td>
+                <td colspan="2"></td>
+	        </#if>
+            </tr>
+        </#if>
+        </table>
+    </form>
+</div>
+<script>
+<#list updateFieldList as item>
+	<#if item.input_type == 'icon'>
+//点击非icon控件关闭icon页面	
+$(document).click(function() {
+	var target = event.target || event.srcElement;
+	if(!$(target).hasClass("icon")) {
+		top.window.closePopup();
+	}
+});
+	<#break>
+	</#if>
+</#list>
+
+top.window.subPage.save = save;
+function save() {
+	if($("#ff").form('enableValidation').form('validate')) {
+		$.post("add", getParam(), function(data) {
+			if(data.result == "success") {
+				top.window.closeWindow();
+				top.window.subPage.loadCurrDatagrid();
+			}
+		});
+	}
+}
+function getParam() {
+	var param = {
+	    "headId": ${headId}, 
+		<#list addFieldList as item>
+       		"model.${item.field_name}": getInputValue("${item.field_name}")<#if addFieldList.size()!=item_index>, </#if>
+		</#list>
+	}
+	for(key in param) {
+		if(!param[key]) {
+			delete param[key];
+		}
+	}
+	return param;
+}
+
+//扩展js
+<#list jsList as item>
+	<#if item.page?contains("add")>
+	${item.jsContentData!item.js_content}
+	</#if>
+</#list>
+</script>
+<#include "/common/foot.html"/>

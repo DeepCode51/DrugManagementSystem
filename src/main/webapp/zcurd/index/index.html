@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>zcurd</title>
+<style type="text/css">
+body {font-family: Arial, Helvetica, sans-serif; line-height: 30px; color: #2f8ec7;}
+h2, .color1 {color: orange;}
+.zhichi {border: 2px solid orange; padding: 2px; font-size: 22px; width: 30px; height: 30px; line-height: 30px; border-radius: 30px; text-align: center; cursor: pointer; position: fixed; bottom: 50px; right: 50px;}
+</style>
+</head>
+<body>
+	<p>欢迎！</p>
+
+	
+	
+	<div class="zhichi" onclick="zhichi()">+</div>
+	
+<script type="text/javascript">
+function zhichi() {
+	var d = document.getElementById("block_zczz");
+	if(d.style.display == "none") {
+		d.style.display = "block";
+	}else {
+		d.style.display = "none";
+	}
+}
+</script>	
+</body>
+</html>

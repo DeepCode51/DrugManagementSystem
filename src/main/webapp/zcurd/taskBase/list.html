@@ -1,0 +1,263 @@
+
+<#include "/common/head.html"/>
+<div id="subLayout" class="easyui-layout" data-options="fit:true, border:false">
+	<div data-options="region:'center', border:false">
+	    
+    <table id="dg"></table>
+    <div id="tb" style="padding:2px 5px;">
+        <div class="wrap_search">
+			            	<span class="search_item">
+				            	<span class="item_text">名称: </span>
+				            	<span class="item_obj">
+				            		<input class="easyui-textbox" type="text" name="name" id="name" value=""/>
+				            	</span>    
+				            </span>
+		            	<span class="search_item">
+			            	<span class="item_text">任务类型: </span>
+			            	<span class="item_obj">
+			            		<input class="easyui-combobox" name="target_type" id="target_type" value="" style="width:100px" data-options="
+			            				valueField: 'id',
+        								textField: 'text',
+			            				data: [
+			            					{id:'', text:''}<#list dictDatatarget_type.keySet() as key>,{id:'${key}', text:'${dictDatatarget_type.get(key)}'}</#list>
+			            				]
+			            			" />
+			            	</span>    
+			            </span>
+		            	<span class="search_item">
+			            	<span class="item_text">状态: </span>
+			            	<span class="item_obj">
+			            		<input class="easyui-combobox" name="status" id="status" value="" style="width:100px" data-options="
+			            				valueField: 'id',
+        								textField: 'text',
+			            				data: [
+			            					{id:'', text:''}<#list dictDatastatus.keySet() as key>,{id:'${key}', text:'${dictDatastatus.get(key)}'}</#list>
+			            				]
+			            			" />
+			            	</span>    
+			            </span>
+        </div>
+        <div style="text-align: left; margin:6px;">
+            <a href="javascript:void(0)" class="easyui-linkbutton addBtn" iconCls="glyphicon-plus" plain="true" onclick="add()">增加</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton updateBtn" iconCls="glyphicon-pencil" plain="true" onclick="update()">编辑</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton delBtn" iconCls="glyphicon-remove" plain="true" onclick="del()">删除</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton detailBtn" iconCls="glyphicon-map-marker" plain="true" onclick="detail()">详情</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton exportBtn" iconCls="glyphicon-export" plain="true" onclick="exportCsv()">导出</a>
+            <div id="searchBtnWrap" style="float:right; padding-right:40px;">
+                <a href="javascript:void(0)" class="easyui-linkbutton color1" iconCls="glyphicon-search" onclick="zcurdSearch(this)">搜索</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton color2" iconCls="glyphicon-repeat" onclick="flushPage()">重置</a>
+            </div>
+        </div>
+    </div>
+	
+	</div>
+    <div data-options="region:'east',split:true, border:false, collapsed:true, width:window.subPageWidth||'40%', title:'运行日志', onCollapse: function(){_openSubPageFlag=false;}">
+    	<iframe id="subIframe" class="easyui-panel" data-options="fit:true,border:false"></iframe>
+    </div>
+</div>     
+
+<script type="text/javascript">
+var datagrid = $("#dg");
+
+var dgOptions = {
+        rownumbers:true,
+    	fit:true,
+    	border:false,
+        rownumbers:true,
+    	url:'listData',
+    	method:'post',
+    	toolbar:'#tb',
+    	pageSize: 20,
+    	pagination:true,
+    	multiSort:true,
+    	singleSelect:true,
+        queryParams: getInitParam(),
+        columns: [[
+		         {field:'id', checkbox:true}
+	           	 ,{field:'name', title: '名称', width:120, sortable: true }
+	           	 ,{field:'target_type', title: '任务类型', width:70, sortable: true }
+	           	 ,{field:'target_value', title: '任务值', width:140, sortable: true }
+	           	 ,{field:'cron', title: 'cron表达式', width:100, sortable: true }
+	           	 ,{field:'last_run_result', title: '上次执行结果', width:90, sortable: true }
+	           	 ,{field:'last_run_time', title: '上次执行时间', width:120, sortable: true }
+	           	 ,{field:'last_run_time_cost', title: '上次执行耗时', width:90, sortable: true }
+	           	 ,{field:'status', title: '状态', width:80, sortable: true, styler:function(val, row) {
+	           		 if(val == "等待运行") {
+	           			return 'background-color: #4cae4c; color: #fff;';
+	           		 }else if(val == "运行中") {
+	           			return 'background-color: #4cae4c; color: #ffa500;';
+	           		 }
+	           	 }}
+	           	 ,{field:'create_time', title: '创建时间', width:120, sortable: true }
+	         	 ,{field:'operate', title: '操作', width: 140, frozen:true,
+	             	formatter: function(value, row, index){
+	             		var html = "";
+	             		if((row._status || row.status) == 1) {
+	             			html += '<a class="operate" href="###" onclick="startOrStop(' + index + ', 2)">停止</a>';
+	             		}else {
+		             		html += '<a class="operate" href="###" onclick="startOrStop(' + index + ', 1)">启动</a>';
+	             		}
+	             		html += '<a class="operate" href="###" onclick="runAtSoon(' + index + ')">立即执行</a>';
+	             		html += '<a class="operate" href="###" onclick="runLog(' + index + ')">执行记录</a>';
+	     			  	return html;
+	     		  	} 
+	             }
+           ]],
+           loadFilter: function(data) {
+        	   if(data.result && data.result == 'fail') {	//失败时，错误消息提示
+        		   showWarnMsg(data.msg);
+        		   return {};
+        	   }else {
+        		   return data;
+        	   }
+           }
+	};
+$(function() {
+	handleAuthDataRule();
+	datagrid.datagrid(dgOptions);
+});
+
+function zcurdSearch() {
+	var param = zcurdGetParam();
+	datagrid.datagrid("load", {
+		queryParams: param
+	})
+}
+
+function zcurdGetParam() {
+	var param = {};
+	$("#tb :input[name]").each(function(i, item) {
+		if($(item).val()) {
+			param[$(item).attr("name")] = $(item).val();	
+		}
+	});
+	return param;
+}
+
+function getInitParam() {
+	var param = {};
+	$("#tb :input[name]").each(function(i, item) {
+		if($(item).val()) {
+			param["queryParams[" + $(item).attr("name") + "]"] = $(item).val();	
+		}
+	});
+	return param;
+}
+
+var initPara = zcurdGetParam();
+function add() {
+	top.window.subPage.loadCurrDatagrid = function() {
+		showMsg("增加成功！");
+		datagrid.datagrid("load");
+	}
+	top.openWindow("定时任务-增加", getCurrUrl("addPage") + "?" + $.param(initPara), {size: '600x400'});
+}
+
+function update() {
+	var rowsSel = datagrid.datagrid("getSelections");
+	if(rowsSel.length != 1) {
+		showWarnMsg("请选择需要编辑的一条数据！");
+		return;
+	}
+	var id = rowsSel[0].id;
+	top.window.subPage.loadCurrDatagrid = function() {
+		showMsg("更新成功！");
+		datagrid.datagrid("reload");
+	}
+	top.openWindow("定时任务-编辑", getCurrUrl("updatePage") + "?id=" + id, {size: '600x400'});
+}
+
+function del() {
+	var ids = [];
+	$.each(datagrid.datagrid("getSelections"), function(i, item) {
+		ids.push(item.id);
+	});
+	if(ids.length < 1) {
+		showWarnMsg("请选择需要删除的数据！");
+		return;
+	}
+	confirmMsg("确认删除？", function() {
+		$.post("delete", {id: ids}, function(data) {
+			showMsg("删除成功！");
+			datagrid.datagrid("reload");
+		});
+	});
+}
+
+function detail() {
+	var rowsSel = datagrid.datagrid("getSelections");
+	if(rowsSel.length != 1) {
+		showWarnMsg("请选择需要查看的一条数据！");
+		return;
+	}
+	var id = rowsSel[0].id;
+	top.openWindow("定时任务-详情", getCurrUrl("detailPage") + "?id=" + id, {size: '600x400'});
+}
+
+function exportCsv() {
+	var option = datagrid.datagrid("options");
+	var param = option.queryParams;
+	param.sortName = option.sortName;
+	param.sortOrder = option.sortOrder;
+	window.location.href = "exportCsv?" + $.param(param);
+}
+
+/**
+ * 启动/停止
+ */
+function startOrStop(index, status) {
+	var tipMsg = "停止";
+	if(status == 1) {
+		tipMsg = "启动";
+	}
+	confirmMsg("确认" + tipMsg + "?", function() {
+		var row = datagrid.datagrid("getRows")[index];
+		$.post("startOrStop", {id: row.id, status: status}, function(data) {
+			showMsg(tipMsg + "成功！");
+			datagrid.datagrid("reload");
+		});
+	});
+}
+
+/**
+ * 立即执行
+ */
+function runAtSoon(index) {
+	confirmMsg("确认立即执行?", function() {
+		var row = datagrid.datagrid("getRows")[index];
+		$.post("runAtSoon", {id: row.id}, function(data) {
+			showMsg("操作成功！");
+			datagrid.datagrid("reload");
+		});
+	});
+}
+
+/**
+ * 运行日志
+ */
+function runLog(index) {
+	var row = datagrid.datagrid("getRows")[index];
+	_openSubPage(basePath + "/zcurd/24/listPage?task_id=" + row.id);
+}
+
+/**
+ * 打开子页
+ */
+var _openSubPageFlag = false;
+function _openSubPage(pageUrl) {
+	if(!_openSubPageFlag) {
+		$("#subLayout").layout("expand", "east");
+		setTimeout(function() {
+			$("#subIframe").attr("src", pageUrl);
+		}, 600);
+		_openSubPageFlag = true;
+	}else {
+		$("#subIframe").attr("src", pageUrl);
+	}
+}
+
+//扩展js
+</script>
+
+<#include "/common/dialogWindow.html"/>
+<#include "/common/foot.html"/>

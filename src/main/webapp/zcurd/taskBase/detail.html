@@ -1,0 +1,59 @@
+
+<#include "/common/head.html"/>
+
+
+ <div class="easyui-panel detailPage" data-options="fit:true,border:false">
+    <form id="ff" class="easyui-form" method="post">
+        <table class="table1">
+            <tr>
+           		<th><span id="name_label">名称：</span></th>
+	               	<td><span class="valueSpan"><pre>${model.name!''}</pre></span></td>
+            <tr>
+           		<th><span id="target_type_label">任务类型：</span></th>
+	               	<td><span class="valueSpan"><pre>${model.target_type!''}</pre></span></td>
+            </tr>
+            <tr>
+           		<th><span id="target_value_label">任务值：</span></th>
+	               	<td><span class="valueSpan"><pre>${model.target_value!''}</pre></span></td>
+            </tr>
+            <tr>
+           		<th><span id="cron_label">cron表达式：</span></th>
+	               	<td><span class="valueSpan"><pre>${model.cron!''}</pre></span></td>
+            </tr>
+            <tr>
+           		<th><span id="last_run_result_label">上次执行结果：</span></th>
+	               	<td><span class="valueSpan"><pre>${model.last_run_result!''}</pre></span></td>
+            </tr>
+            <tr>
+           		<th><span id="last_run_time_label">上次执行时间：</span></th>
+	               	<td><span class="valueSpan"><pre>${model.last_run_time!''}</pre></span></td>
+            </tr>
+            <tr>
+           		<th><span id="last_run_time_cost_label">上次执行耗时：</span></th>
+	               	<td><span class="valueSpan"><pre>${model.last_run_time_cost!''}</pre></span></td>
+            </tr>
+            <tr>
+           		<th><span id="status_label">状态：</span></th>
+	               	<td><span class="valueSpan"><pre>${model.status!''}</pre></span></td>
+            </tr>
+            <tr>
+           		<th><span id="create_user_id_label">创建人：</span></th>
+	               	<td><span class="valueSpan"><pre>${model.create_user_id!''}</pre></span></td>
+            </tr>
+            <tr>
+           		<th><span id="create_time_label">创建时间：</span></th>
+	               	<td><span class="valueSpan"><pre>${model.create_time!''}</pre></span></td>
+            </tr>
+           	
+        </table>
+    </form>
+</div>
+<script>
+top.window.subPage.save = save;
+function save() {
+	top.window.closeWindow();
+}
+
+//扩展js
+</script>
+<#include "/common/foot.html"/>

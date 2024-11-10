@@ -1,0 +1,168 @@
+body{padding: 0px; margin: 0px; font-family: Arial, Helvetica, sans-serif; font-size: 12px;}
+a{text-decoration: none;color: inherit;}
+a:hover{color: blue;}
+pre{margin: 0px; padding: 0px;}
+textarea {border: 1px solid #D3D3D3; border-radius: 2px;}
+table{border-collapse: collapse;}
+table th{font-weight: normal; color: #383838; text-align: right; }
+
+.wrap_search{margin: 5px 0px;}
+.wrap_search .search_item, .wrap_search .search_item .item_text, .wrap_search .search_item .item_obj{display: inline-block;height: 28px; line-height: 28px; overflow: hidden;}
+.wrap_search .search_item{width: 200px;}
+.wrap_search .search_item .item_text{width: 80px; text-align: right;}
+.wrap_search .search_item .item_obj{}
+.wrap_search .search_item.search_between{display: inline-block; width: 400px;}
+.wrap_search input,select{width: 100px;}
+
+.dg_btns_wrap {text-align: left; margin:6px; min-height: 26px;}
+
+.addPage table, .updatePage table, .detailPage table{width: 100%; margin: 10px 0px;}
+.addPage table td, .updatePage table td, .detailPage table td {padding: 5px;}
+.addPage table th, .updatePage table th, .detailPage table th {padding: 5px; width: 120px;}
+.addPage table th span, .updatePage table th span, .detailPage table th span {display: inline-block; width: 110px;}
+.addPage table td input, .updatePage table td input {border: 1px solid #D3D3D3; border-radius: 0px; width: 100%; height: 100%;}
+.addPage table td textarea, .updatePage table td textarea {border: 1px solid #D3D3D3; width: 100%;}
+
+.detailPage .valueSpan{display: inline-block; word-break:break-all; line-height: 18px; padding: 4px;}
+.detailPage.multiple .valueSpan{display: inline-block; min-width: 140px; max-width: 220px; word-break:break-all;}
+
+.add_content input.box{width: 13px;}
+.datagrid-btable .operate{padding: 2px;}
+
+.wrap_input{height: 28px; padding: 2px 15px 2px 2px;}
+.wrap_input.textarea{height: auto; padding-right: 20px;}
+.multiple .wrap_input{width: 200px;}
+.wrap_input input.validatebox-invalid{border-color: #ffa8a8;}
+
+/**弹窗遮布背景**/
+.window-proxy-mask, .window-mask {background: #000000;}
+.window-mask{filter: alpha(opacity=60);opacity: 0.6;}
+
+.detail_page .item {display: inline-block; min-width: 100px; max-width: 180px;}
+
+.datagrid-header-row, .datagrid-row {height: 29px;}
+/** 列表中的图片 **/
+.datagrid-body .dg_img{max-width: 200px; height: 50px; padding-top: 5px;}
+
+.textbox-focused {
+  border-color: #48ADE0;
+  -moz-box-shadow: 0 0 1px 0 #D3D3D3;
+  -webkit-box-shadow: 0 0 1px 0 #D3D3D3;
+  box-shadow: 0 0 1px 0 #D3D3D3;
+}
+
+/**调整tabs样式**/
+.tabs li a.tabs-inner {border-radius: 0px;}
+.tabs-header, .tabs-tool {
+    background-color: #D9DEE4;
+    padding-top: 4px;
+}
+.tabs-header {
+	#padding-top: 22px;
+}
+
+.tabs li.tabs-selected * {
+	color: #09c;
+}
+.tabs li.tabs-selected a.tabs-inner {
+    border: 1px solid #2dc4f7;
+    border-bottom: 1px solid #fff;
+    
+}
+.tabs li a.tabs-close {
+    background-position-x: 1000px;
+    font-weight: bold;
+  	font-size: 12px;
+  	text-align: center;
+    line-height: 10px;
+}
+.tabs li .tabs-close:before {content: "x";}
+ 
+ 
+/**table**/
+.datagrid-header td, .datagrid-body td, .datagrid-footer td {
+    border-color: #EAEDF1;
+    border-style: solid;
+}
+.datagrid-header, .datagrid-td-rownumber {
+    background-color: #f5f5f5;
+    background: #f5f5f5;
+}
+
+/**调整window样式**/
+.window-thinborder .window-header {
+    padding: 8px 8px;
+}
+
+.l-btn {
+	border-radius: 2px;
+    padding: 1px 4px;
+    margin: 0px 4px;
+}
+
+.l-btn.l-btn-plain {
+    padding: 1px;
+	margin: 0px;
+}
+
+.l-btn.l-btn-plain:hover {
+	border-radius: 2px;
+  	background: #e2e2e2;
+  	color: #000000;
+	padding: 0px;
+  	border: 1px solid #ccc;
+}
+
+.l-btn.color1, .l-btn.color1 .l-btn-icon {
+	color: #fff;
+    border: 1px solid #09c;
+    background: #09c;
+}
+
+.l-btn.color1:hover{
+	opacity: 0.9;
+}
+
+.l-btn.color2 {
+	border: 1px solid #dedede;
+    background: #f1f1f1;
+    color: #333;
+}
+
+.l-btn.color2:hover{
+	opacity: 0.9;
+}
+
+.textbox, .textbox .textbox-text {border-radius: 2px;}
+
+.combobox-item, .combobox-group{min-height: 12px;}
+
+/** 预览图片 **/
+.image_pre{max-width: 150px; max-height: 150px; padding: 2px; display: none;}
+.image_pre img{max-width: 100%; max-height: 150px;}
+
+/** 变量符号 **/
+.symbol_var{font-style: normal;}
+
+/*定义滚动条宽高及背景，宽高分别对应横竖滚动条的尺寸*/
+.scrollbar::-webkit-scrollbar{
+    width: 8px;
+    height: 8px;
+}
+/*定义滚动条的轨道，内阴影及圆角*/
+.scrollbar::-webkit-scrollbar-track{
+    background-color: #424f63;
+}
+/*定义滑块，内阴影及圆角*/
+.scrollbar::-webkit-scrollbar-thumb{
+    background-color: #09C;
+    background-clip: content-box;
+    border-top: 5px solid rgba(255,255,255,0);
+    border-bottom: 5px solid rgba(255,255,255,0);
+    border-right: 4px solid rgba(255,255,255,0);
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.scrollbar:hover::-webkit-scrollbar-thumb{
+	background-color: #09C;
+}

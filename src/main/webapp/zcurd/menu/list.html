@@ -1,0 +1,90 @@
+<#include "/common/head.html"/>
+    <table id="dg"></table>
+    <div id="tb" style="padding:2px 5px;">
+        <div style="text-align: left; margin:6px;">
+            <a href="javascript:void(0)" class="easyui-linkbutton addBtn" iconCls="glyphicon-plus" plain="true" onclick="add()">增加</a>
+           	<a href="javascript:void(0)" class="easyui-linkbutton updateBtn" iconCls="glyphicon-pencil" plain="true" onclick="update()">编辑</a>
+           	<a href="javascript:void(0)" class="easyui-linkbutton delBtn" iconCls="glyphicon-remove" plain="true" onclick="del()">删除</a>
+        </div>
+    </div>
+<script type="text/javascript">
+var datagrid = $("#dg");
+$(function() {
+	//显示列表
+	datagrid.treegrid({
+		idField: 'id',
+        treeField: 'menu_name',
+		rownumbers:true,
+    	fit:true,
+    	border:false,
+    	rownumbers:true,
+    	url: "${basePath}/menu/listAll",
+    	method:'get',
+    	toolbar:'#tb',
+    	singleSelect:false,
+    	columns:[[
+	    	{field:'menu_name', title: '菜单名称', width:150},
+	    	{field:'menu_url', title: '菜单地址', width:150},
+	        {field:'icon', title: '图标', width:150},
+	        {field:'order_num', title: '排序', width:80}
+	    ]],
+	    loadFilter: function(data) {
+	    	$.each(data, function(i, item) {
+	    		item.iconCls = item.icon;
+	    		if(item.parent_id > 0) {
+		    		item._parentId = item.parent_id;
+	    		}
+	    	});
+	    	return {rows: data, total: 0};
+	    }
+	});
+});
+
+function add() {
+	top.window.subPage.loadCurrDatagrid = function() {
+		showMsg("增加成功！");
+		datagrid.treegrid("load");
+	}
+	top.window.subPage.currDatagrid = datagrid;
+	top.openWindow("增加", "${basePath}/menu/addPage", {width: 600, heigth: 400});
+}
+
+function update() {
+	var rowsSel = datagrid.datagrid("getSelections");
+	if(rowsSel.length != 1) {
+		showWarnMsg("请选择需要编辑的一条数据！");
+		return;
+	}
+	top.window.subPage.loadCurrDatagrid = function() {
+		showMsg("更新成功！");
+		datagrid.treegrid("load");
+	}
+	var id = rowsSel[0].id;
+	top.openWindow("编辑", "${basePath}/menu/updatePage?id=" + id);
+}
+
+function del() {
+	var ids = [];
+	var selRows = datagrid.datagrid("getSelections");
+	for(var i=0; i<selRows.length; i++) {
+		if(selRows[i].children) {
+			showWarnMsg("不能删除目录！");
+			return;
+		}
+		ids.push(selRows[i].id);
+	}
+	if(ids.length < 1) {
+		showWarnMsg("请选择需要删除的数据！");
+		return;
+	}
+	confirmMsg("确认删除？", function() {
+		$.post("delete", {id: ids}, function(data) {
+			showMsg("删除成功！");
+			datagrid.treegrid("load");
+		});
+	});
+}
+</script>
+
+<#include "/common/dialogWindow.html"/>
+<#include "/common/foot.html"/>

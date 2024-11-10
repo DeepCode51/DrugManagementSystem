@@ -1,0 +1,116 @@
+<#include "/common/head.html"/>
+    
+    <table id="dg"></table>
+    <div id="tb" style="padding:2px 5px;">
+        <div class="wrap_search">
+		            	<span class="search_item">
+			            	<span class="item_text">用户: </span>
+			            	<span class="item_obj">
+			            		<input class="easyui-combobox" name="user_id" id="user_id" value="" style="width:100px" data-options="
+			            				valueField: 'id',
+        								textField: 'text',
+			            				data: [
+			            					{id:'', text:''}<#list dictDatauser_id.keySet() as key>,{id:'${key}', text:'${dictDatauser_id.get(key)}'}</#list>
+			            				]
+			            			" />
+			            	</span>    
+			            </span>
+		        		
+			            	<span class="search_item">
+				            	<span class="item_text">操作内容: </span>
+				            	<span class="item_obj">
+				            		<input class="easyui-textbox" type="text" name="op_content" id="op_content" value=""/>
+				            	</span>    
+				            </span>
+		        		
+			            	<span class="search_item">
+				            	<span class="item_text">ip: </span>
+				            	<span class="item_obj">
+				            		<input class="easyui-textbox" type="text" name="ip" id="ip" value=""/>
+				            	</span>    
+				            </span>
+		        		
+			        		<span class="search_item search_between">
+				                <span class="item_text">操作时间: </span>
+				                <span class="item_obj">
+				                    <input class="easyui-datebox" name="_start_create_time" id="_start_create_time" value=""/> ～ <input class="easyui-datebox" name="_end_create_time" id="_end_create_time" value=""/>
+				                </span>
+				            </span>
+        </div>
+        <div style="text-align: left; margin:6px; min-height: 26px;">
+            <a href="javascript:void(0)" class="easyui-linkbutton exportBtn" iconCls="glyphicon-export" plain="true" onclick="exportCsv()">导出</a>
+            <div id="searchBtnWrap" style="float:right; padding-right:40px;">
+                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="glyphicon-search" onclick="zcurdSearch(this)">搜索</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="glyphicon-repeat" onclick="flushPage()">重置</a>
+            </div>
+        </div>
+    </div>
+    
+
+<script type="text/javascript">
+var datagrid = $("#dg");
+
+var dgOptions = {
+        rownumbers:true,
+    	fit:true,
+    	border:false,
+        rownumbers:true,
+    	url:'listData',
+    	method:'post',
+    	toolbar:'#tb',
+    	pageSize: 20,
+    	pagination:true,
+    	multiSort:true,
+        queryParams: getInitParam(),
+        
+        columns: [[
+		         {field:'id', checkbox:true}
+	           	 ,{field:'user_id', title: '用户', width:150, sortable: true}
+	           	 ,{field:'op_content', title: '操作内容', width:300, sortable: true}
+	           	 ,{field:'ip', title: 'ip', width:150, sortable: true}
+	           	 ,{field:'create_time', title: '操作时间', width:150, sortable: true}
+	           ]]
+	};
+$(function() {
+	handleAuthDataRule();
+	datagrid.datagrid(dgOptions);
+});
+
+function zcurdSearch() {
+	var param = zcurdGetParam();
+	datagrid.datagrid("load", {
+		queryParams: param
+	})
+}
+
+function zcurdGetParam() {
+	var param = {};
+	$("#tb :input[name]").each(function(i, item) {
+		if($(item).val()) {
+			param[$(item).attr("name")] = $(item).val();	
+		}
+	});
+	return param;
+}
+
+function getInitParam() {
+	var param = {};
+	$("#tb :input[name]").each(function(i, item) {
+		if($(item).val()) {
+			param["queryParams[" + $(item).attr("name") + "]"] = $(item).val();	
+		}
+	});
+	return param;
+}
+
+function exportCsv() {
+	var option = datagrid.datagrid("options");
+	var param = option.queryParams;
+	param.sortName = option.sortName;
+	param.sortOrder = option.sortOrder;
+	window.location.href = "exportCsv?" + $.param(param);
+}
+</script>
+
+<#include "/common/dialogWindow.html"/>
+<#include "/common/foot.html"/>

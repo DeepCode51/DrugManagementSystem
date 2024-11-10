@@ -1,0 +1,24 @@
+devMode = true
+
+base_jdbcUrl = jdbc:mysql://127.0.0.1/graduation_zcurd_base?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useUnicode=true&relaxAutoCommit=true&useSSL=false&serverTimezone=GMT%2B8
+base_user = root
+base_password = 123456
+
+busi_jdbcUrl = jdbc:mysql://127.0.0.1/graduation_zcurd_busi?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useUnicode=true&relaxAutoCommit=true&useSSL=false&serverTimezone=GMT%2B8
+busi_user = root
+busi_password = 123456
+
+
+#线上环境
+#base_jdbcUrl = jdbc:mysql://sqld.duapp.com:4050/RNgzmIUDlqijbJEoUHYG?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull
+#base_user = e3218f67d6a04062977c1e26992bb855
+#base_password = a62872b13fc7469184d9b8b959a032fa
+
+#busi_jdbcUrl = jdbc:mysql://sqld.duapp.com:4050/xdxJySHokCQtMlEJpSqm?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull
+#busi_user = e3218f67d6a04062977c1e26992bb855
+#busi_password = a62872b13fc7469184d9b8b959a032fa
+
+
+#代码生成保存地址
+#genCodePath = F:/genCode/
+genCodePath = /Users/user/Desktop/genCode/

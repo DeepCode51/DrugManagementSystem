@@ -1,0 +1,118 @@
+<#include "/common/head.html"/>
+
+ <div class="easyui-panel addPage" data-options="fit:true,border:false">
+    <form id="ff" method="post" class="easyui-form" data-options="novalidate:true">
+        <table class="table1">
+            <tr>
+           		<th><span>菜单名称：</span></th>
+               	<td>
+            		<div class="wrap_input"><input class="easyui-textbox" data-options="fit:true, required:true" type="text" name="menu_name"></input></div>
+           		</td>
+           	</tr>
+        	<tr>	
+           		<th><span>菜单地址：</span></th>
+               	<td>
+            		<div class="wrap_input"><input class="easyui-textbox" type="text" name="menu_url" data-options="fit:true, required:true"></input></div>
+           		</td>
+            </tr>
+        	<tr>
+           		<th><span>上级菜单：</span></th>
+               	<td>
+            		<div class="wrap_input"><input id="parent_id" class="easyui-textbox" type="text" name="parent_id" data-options="fit:true, required:true"></input></div>
+           		</td>
+           	</tr>
+        	<tr>	
+           		<th><span>图标：</span></th>
+               	<td>
+            		<div class="wrap_input"><input type="text" name="icon" onclick='top.window.openPopup(this, "请选择图标", "${basePath}/common/iconsPage", {width: 540, height: 400})'></input></div>
+           		</td>
+            </tr>
+            <tr>
+           		<th><span>顺序：</span></th>
+               	<td>
+            		<div class="wrap_input"><input class="easyui-textbox" type="text" name="order_num" data-options="fit:true"></input></div>
+           		</td>
+            </tr>
+        </table>
+    </form>
+</div>
+<script>
+$(function() {
+	var rowsSel = top.window.subPage.currDatagrid.datagrid("getSelections");
+	if(rowsSel.length > 0) {
+		$("#parent_id").val(rowsSel[0].id);
+	}else {
+		$("#parent_id").val("0");
+	}
+
+	//上级菜单
+	$.post("${basePath}/menu/listAll", function(data) {
+		var menulist = [];
+		$.each(data, function(i, item) {
+			menulist.push({
+				id: item.id,
+				text: item.menu_name,
+				attributes: '/zcurd' + item.menu_url, 
+				parent_id: item.parent_id,
+				iconCls: item.icon
+			});
+		});
+		
+		for(var i = 0; i < menulist.length; i++) {
+			var children = menulist[i].children || [];
+			for(var j = 0; j < menulist.length; j++) {
+				if(menulist[j].parent_id == menulist[i].id) {
+					children.push(menulist[j]);
+				}
+			}
+			menulist[i].children = children;
+		}
+		
+		var treeData = [{id:"0", text:'一级菜单', iconCls:'glyphicon-asterisk'}];
+		$.each(menulist, function(i, item) {
+			if(item.parent_id == 0) {
+				treeData.push(item);
+			}
+		});
+		$("#parent_id").combotree({
+			data: treeData
+		});
+	});
+	
+	$(document).click(function() {
+		var target = event.target || event.srcElement;
+		if($(target).attr("name") != 'icon') {
+			top.window.closePopup();
+		}
+	});
+});
+
+top.window.subPage.save = save;
+function save(successFunc) {
+	if($("#ff").form('enableValidation').form('validate')) {
+		$.post("add", getParam(), function(data) {
+			if(successFunc) {
+				successFunc();
+			}
+			top.window.closeWindow();
+			top.window.subPage.loadCurrDatagrid();
+		});
+	}
+}
+function getParam() {
+	var param = {
+   	    "model.menu_name": $(":input[name='menu_name']").val(), 
+  	    "model.menu_url": $(":input[name='menu_url']").val(), 
+  	    "model.parent_id": $(":input[name='parent_id']").val(), 
+  	    "model.icon": $(":input[name='icon']").val(), 
+   	    "model.order_num": $(":input[name='order_num']").val()
+	}
+	for(key in param) {
+		if(!param[key]) {
+			delete param[key];
+		}
+	}
+	return param;
+}
+</script>
+<#include "/common/foot.html"/>

@@ -1,0 +1,77 @@
+<#include "/common/head.html"/>
+
+<style>
+table tr{
+	cursor: pointer;
+}
+table tr.curr{
+	background: orange;
+	color: white;
+}
+table tr td{
+	padding: 4px 8px;
+}
+
+.remark {
+	padding: 10px;
+}
+</style>
+
+<script type="text/javascript">
+$(function() {
+	$("#taskTable tr").click(function() {
+		var tr = $(this);
+		if(!tr.hasClass("curr")) {
+			$("#taskTable tr.curr").removeClass("curr");
+			tr.addClass("curr");
+			top.window.popup.ipt.val(tr.find("td:first").text());
+			top.window.closePopup();
+		}
+	});
+
+	//选中当前图标
+	selectCurr();
+	top.window.popup.show = selectCurr;
+});
+
+function selectCurr() {
+	var currValue = top.window.popup.ipt.val();
+	$("#taskTable tr.curr").removeClass("curr");
+	$("#taskTable tr td").each(function(i, item) {
+		if($(item).text() == currValue) {
+			$(item).parent().addClass("curr");
+		}
+	});
+}
+</script>
+
+<table id="taskTable" style="width: 100%;">
+	<tr>
+		<td width="120px">*/1 * * * *</td>
+		<td>1分钟执行一次</td>
+	</tr>
+	<tr>
+		<td>0 */1 * * *</td>
+		<td>1小时执行一次</td>
+	</tr>
+	<tr>
+		<td>*/5 * * * *</td>
+		<td>5分钟执行一次</td>
+	</tr>
+	<tr>
+		<td>0 */5 * * *</td>
+		<td>5小时执行一次</td>
+	</tr>
+	<tr>
+		<td>30 2 * * *</td>
+		<td>每天02点30分执行一次</td>
+	</tr>
+</table>
+
+<br/>
+<div class="remark">
+	参考1：<a href="http://www.atool.org/crontab.php" target="_blank">http://www.atool.org/crontab.php</a><br/>
+	参考2：<a href="http://www.jfinal.com/doc/9-2" target="_blank">http://www.jfinal.com/doc/9-2</a><br/>
+</div>
+
+<#include "/common/foot.html"/>

@@ -1,0 +1,191 @@
+<#include "/common/head.html"/>
+
+<div id="cc" class="easyui-layout" data-options="fit:true,border:false" style="">
+    <div data-options="region:'west',split:true,border:false" style="width:250px;">
+    	<div class="easyui-panel" title="菜单列表" data-options="fit:true,border:false,tools:'#tt'">
+	       	<ul id="menuTree"></ul>
+    	</div>
+    	<div id="tt">
+	        <a href="javascript:void(0)" title="保存" class="icon-save" onclick="javascript:saveAuth()"></a>
+	    </div>
+    </div>
+    <div data-options="region:'center',border:false">
+    	<div class="easyui-tabs" data-options="border:false,fit:true">
+	        <div title="按钮权限">
+	        	<iframe id="btnIframe" src="" class="easyui-panel" data-options="fit:true,border:false" frameborder="0"></iframe>
+	        </div>
+	        <div title="数据权限" data-options="border:false,fit:true">
+	        	<iframe id="dataruleIframe" src="" class="easyui-panel" data-options="fit:true,border:false" frameborder="0"></iframe>
+	        </div>
+	    </div>
+    </div>
+</div>
+
+<script>
+var menuBtnObj = {};
+var menuDataruleObj = {};
+var currMenuId = 0;
+var roleId = "${roleId!}";
+
+<#list btnIds as item>
+var oneMenuBtns = menuBtnObj[${item.menu_id}] || [];
+oneMenuBtns.push(${item.id});
+menuBtnObj[${item.menu_id}] = oneMenuBtns;
+</#list>
+
+<#list dataruleIds as item>
+var oneMenuDatarules = menuDataruleObj[${item.menu_id}] || [];
+oneMenuDatarules.push(${item.id});
+menuDataruleObj[${item.menu_id}] = oneMenuDatarules;
+</#list>
+
+
+//保存权限
+function saveAuth() {
+	if(!roleId) {
+		showWarnMsg("请选择角色！");
+		return;
+	}
+	
+	flushMenuBtnObj();
+	//获得选中菜单
+	var menuIds = "";
+	$.each($('#menuTree').tree('getChecked'), function(i, item) {
+		log(item);
+		if(!item.children == undefined || item.children.length == 0) {
+			menuIds += "," + item.id;
+		}
+	});
+	menuIds = menuIds.replace(",", "");
+	//获得按钮权限
+	var btnIds = "";
+	for(key in menuBtnObj) {
+		$.each(menuBtnObj[key], function(i, item) {
+			btnIds += "," + item;
+		});
+	}
+	btnIds = btnIds.replace(",", "");
+	//获得数据权限
+	var dataruleIds = "";
+	for(key in menuDataruleObj) {
+		$.each(menuDataruleObj[key], function(i, item) {
+			dataruleIds += "," + item;
+		});
+	}
+	dataruleIds = dataruleIds.replace(",", "");
+	
+	var param = {roleId: roleId, menuIds: menuIds, btnIds: btnIds, dataruleIds: dataruleIds};
+	$.post("editAuth", param, function(data) {
+		if(data.result == "success") {
+			showMsg("保存成功！");
+		}
+	});
+}
+
+$.post("getAllMenu?roleId=" + roleId, function(data) {
+	var menulist = [];
+	$.each(data.menuList, function(i, item) {
+		var menu = {
+			id: item.id,
+			text: item.menu_name,
+			attributes: basePath + item.menu_url, 
+			parent_id: item.parent_id,
+			iconCls: item.icon
+		};
+		if(getObjFromList(data.menuIds, "menu_id", item.id)) {
+			menu.checked = true;
+		}
+		menulist.push(menu);
+	});
+	
+	for(var i = 0; i < menulist.length; i++) {
+		var children = menulist[i].children || [];
+		for(var j = 0; j < menulist.length; j++) {
+			if(menulist[j].parent_id == menulist[i].id) {
+				children.push(menulist[j]);
+			}
+		}
+		menulist[i].children = children;
+	}
+	
+	var treeData = [];
+	$.each(menulist, function(i, item) {
+		if(item.parent_id == 0) {
+			treeData.push(item);
+		}
+	});
+	$("#menuTree").tree({
+		data: [{id: 0, text: '全选', children: treeData}],
+		checkbox:true, 
+		onBeforeSelect: treeBeforeSelect, 
+		onSelect: treeSelect
+	});
+});
+
+function treeBeforeSelect(node) {
+    if(node.children && node.children.length > 0) {
+        if(node.state == "open") {
+            $(this).tree("collapse", node.target);
+        }else {
+            $(this).tree("expand", node.target);
+        }
+        return false;
+    } 
+}
+
+function treeSelect(node) {
+	flushMenuBtnObj();
+	currMenuId = node.id;
+	$("#btnIframe").attr("src", "${basePath}/zcurd/5/listPage?menu_id=" + node.id);
+	$("#dataruleIframe").attr("src", "${basePath}/zcurd/6/listPage?menu_id=" + node.id);
+}
+
+function flushMenuBtnObj() {
+	//按钮权限
+	var btnIds = [];
+	var data = getDgSelections();
+	if(!data) {
+		return;
+	}
+	$.each(data, function(i, item) {
+		btnIds.push(item.id);
+	});
+	if(btnIds.length > 0) {
+		menuBtnObj[currMenuId] = btnIds;
+	}else {
+		delete menuBtnObj[currMenuId];
+	}
+	log(menuBtnObj);
+	//数据权限
+	var dataruleIds = [];
+	var data2 = getDgSelections2();
+	if(!data2) {
+		return;
+	}
+	$.each(data2, function(i, item) {
+		dataruleIds.push(item.id);
+	});
+	if(dataruleIds.length > 0) {
+		menuDataruleObj[currMenuId] = dataruleIds;
+	}else {
+		delete menuDataruleObj[currMenuId];
+	}
+	log(menuDataruleObj);
+}
+
+//获得子页选中的按钮，些方法会在子页面中覆盖
+function getDgSelections() {
+	return null;
+}
+function getDgSelections2() {
+	return null;
+}
+
+function getCurrMenuBtns() {
+	return menuBtnObj[currMenuId];
+}
+function getCurrMenuDatarules() {
+	return menuDataruleObj[currMenuId];
+}
+</script>
+<#include "/common/foot.html"/>

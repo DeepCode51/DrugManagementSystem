@@ -1,0 +1,240 @@
+<#include "/common/head.html"/>
+
+ <div id="zcurdHeadTable" class="easyui-layout add_content" data-options="fit:true, border:false">
+    <div data-options="region:'north', border:false" style="height: 72px;">
+    	<form id="ff" method="post">
+        <table cellpadding="5" width="100%">
+            <tr>
+                <th>表单名称:</th>
+                <td><input class="easyui-textbox" type="text" name="form_name" value="${model.form_name}" data-options="required:true" style="width: 120px;"></input></td>
+                <th>数据表名称:</th>
+                <td><input class="easyui-textbox" type="text" name="table_name" value="${model.table_name}" data-options="required:true" style="width: 120px;"></input></td>
+                <th>主键:</th>
+                <td><input class="easyui-textbox" type="text" name="id_field" value="${model.id_field}" data-options="required:true" style="width: 120px;"></input></td>
+            </tr>
+            <tr>
+                <th>弹窗大小:</th>
+                <td>
+                	<input name="dialog_size" value="${model.dialog_size}" class="easyui-combobox" data-options="
+                		valueField: 'id',
+        				textField: 'text',
+                		data:[
+                			{id:'400x300', text:'400x300'},
+                			{id:'600x400', text:'600x400'},
+                			{id:'700x500', text:'700x500'},
+                			{id:'800x600', text:'800x600'}
+               			]
+               		" style="width: 120px;"/>
+                </td>
+                <th>删除标志字段</th>
+                <td><input class="easyui-textbox" type="text" name="delete_flag_field" value="${model.delete_flag_field!''}" data-options="" style="width: 120px;"></input></td>
+                <th>包含功能</th>
+                <td>
+                	<input name="include_func" value="${model.include_func}" class="easyui-combobox" data-options="
+                		valueField: 'id',
+        				textField: 'text',
+        				multiple: true,
+                		data:[
+                			{id:'*', text:'全部'},
+                			<#list includeFuncList as item>
+                				{id:'${item[0]}', text:'${item[1]}'}<#if item_has_next>,</#if>
+                			</#list>
+               			]
+               		" style="width: 120px;"/>
+                </td>
+            </tr>
+        </table>
+    	</form>
+    </div>
+   	<div data-options="region:'center', border:false" style="border-top-width: 1px;">
+            <table id="dg" class="easyui-datagrid"
+                    data-options="
+                    	fit:true,
+                    	rownumbers:true,
+                        border: false,
+                        toolbar: '#tb',
+                        url: 'listField?head_id=${model.id}',
+                        method: 'get',
+                        onClickCell: onClickCell,
+                        onLoadSuccess: function(data) {
+                        	if(data.total < 20) {
+	                        	setTimeout(function(){
+	                                for(var i = 0; i < data.rows.length; i++) {
+	                                    $('#dg').datagrid('beginEdit', i);
+	                                }
+	                            }, 200); 
+                        	}else {
+                        		showMsg('字段数量超出了我的想象，默认不打开编辑模式！');
+                        	}
+                        }
+                    ">
+                <thead>
+                    <tr>
+                    	<th data-options="field:'id', checkbox:true"></th>
+                        <th data-options="field:'field_name',width:100,editor:'textbox'">字段名称</th>
+                        <th data-options="field:'column_name',width:120,editor:'textbox'">列表列名</th>
+                        <th data-options="field:'input_type',width:90,
+                        		editor:{
+                                    type:'combobox',
+                                    options:{
+                                        valueField:'value',
+                                        textField:'text',
+                                        data: [{value:'easyui-textbox', text:'textbox'}, {value:'easyui-combobox', text:'combobox'}
+                                        	   ,{value:'easyui-datebox', text:'datebox'},{value:'easyui-datetimebox', text:'datetimebox'}
+                                        	   ,{value:'textarea', text:'textarea'},{value:'easyui-numberspinner', text:'numberspinner'}
+                                        	   ,{value:'easyui-filebox_img', text:'file(图片)'},{value:'icon', text:'icon'}
+                                        	  ],
+                                        required:true
+                                    }
+                                }">控件类型</th>
+                        <th data-options="field:'is_show_list',width:60,hidden:true,editor:{type:'checkbox'}">列表显示</th>
+                        <th data-options="field:'is_allow_detail',width:60,hidden:true,editor:{type:'checkbox'}">详情显示</th>
+                        <th data-options="field:'is_allow_update',width:60,hidden:true,editor:{type:'checkbox'}">允许编辑</th>                
+                        <th data-options="field:'is_allow_add',width:60,hidden:true,editor:{type:'checkbox'}">允许增加</th>
+                        <th data-options="field:'is_search',width:60,hidden:true,editor:{type:'checkbox'}">是否搜索</th>
+                        <th data-options="field:'search_type',width:60,hidden:true,
+                                editor:{
+                                    type:'combobox',
+                                    options:{
+                                        valueField:'value',
+                                        textField:'text',
+                                        data: [{value:1, text:'值'}, {value:'2', text:'范围'}],
+                                        required:true
+                                    }
+                                }">搜索类型</th> 
+                        <th data-options="field:'is_sum',width:60,hidden:true,editor:{type:'checkbox'}">是否汇总</th>
+                        <th data-options="field:'is_allow_null',width:60,editor:{type:'checkbox',options:{align:'center'}}">允许为空</th>               
+                        <th data-options="field:'column_length',width:40,editor:'textbox'">列宽</th>          
+                        <th data-options="field:'dict_sql',width:100,editor:'textbox'">字典sql</th>
+                        <th data-options="field:'default_value',width:60,editor:'textbox'"><span class="symbol_var" title="支持变量">$</span>默认值</th>
+                        <th data-options="field:'order_num',width:50,align:'center',editor:'textbox'">顺序</th>
+                    </tr>
+                </thead>
+            </table>
+            <div id="tb" style="height:auto">
+			    <a href="###" onclick="showHeadField(1)" class="easyui-linkbutton" data-options="toggle:true,group:'g1',selected:true" style="padding: 0px 4px;">数据</a>
+			    <a href="###" onclick="showHeadField(2)" class="easyui-linkbutton" data-options="toggle:true,group:'g1'" style="padding: 0px 4px;">页面</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="append()">增加</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" onclick="removeit()">删除</a>
+            </div>
+            <script type="text/javascript">
+                var editIndex = undefined;
+                function endEditing(){
+                    if (editIndex == undefined){return true}
+                    if ($('#dg').datagrid('validateRow', editIndex)){
+                        editIndex = undefined;
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+                function onClickCell(index, field){
+                    $('#dg').datagrid('selectRow', index).datagrid('beginEdit', index);return;
+                    if (editIndex != index){
+                        if (endEditing()){
+                            $('#dg').datagrid('selectRow', index)
+                                    .datagrid('beginEdit', index);
+                            var ed = $('#dg').datagrid('getEditor', {index:index,field:field});
+                            if (ed){
+                                ($(ed.target).data('textbox') ? $(ed.target).textbox('textbox') : $(ed.target)).focus();
+                            }
+                            editIndex = index;
+                        } else {
+                            $('#dg').datagrid('selectRow', editIndex);
+                        }
+                    }
+                }
+                function append(){
+                    if (endEditing()){
+                        $('#dg').datagrid('appendRow',{is_show_list:1});
+                        editIndex = $('#dg').datagrid('getRows').length-1;
+                        $('#dg').datagrid('selectRow', editIndex)
+                                .datagrid('beginEdit', editIndex);
+                    }
+                }
+                function removeit(){
+                	$.each($("#dg").datagrid("getSelections"), function(i, item) {
+                		$('#dg').datagrid('deleteRow', $("#dg").datagrid("getRowIndex", item));
+                	});
+                    editIndex = undefined;
+                }
+                function accept(){
+                    if (endEditing()){
+                        $('#dg').datagrid('acceptChanges');
+                    }
+                }
+                function reject(){
+                    $('#dg').datagrid('rejectChanges');
+                    editIndex = undefined;
+                }
+                function getChanges(){
+                    var rows = $('#dg').datagrid('getChanges');
+                    alert(rows.length+' rows are changed!');
+                }
+            </script>
+       </div> 
+</div>
+<script>
+top.window.subPage.save = save;
+function save(successFunc) {
+	if($("#zcurdHeadTable").form('validate')) {
+		accept();
+		var param = getParam();
+		param.rowsStr = JSON.stringify($("#dg").datagrid("getRows"));
+		$.post("update", param, function(data) {
+			if(successFunc) {
+				successFunc();
+			}
+			top.window.closeWindow();
+			top.window.subPage.loadCurrDatagrid();
+		});
+	}
+}
+function getParam() {
+	return {
+		"model.id": ${model.id},
+		"model.form_name": $(":input[name='form_name']").val(), 
+		"model.table_name": $(":input[name='table_name']").val(), 
+		"model.id_field": $(":input[name='id_field']").val(), 
+		"model.is_auto": $(":checked[name='is_auto']").val(),
+		"model.dialog_size": $(":input[name='dialog_size']").val(),
+		"model.delete_flag_field": $(":input[name='delete_flag_field']").val(),
+		"model.include_func": getInputValue("include_func")
+	}
+}
+function submitForm(){
+    $('#ff').form('submit');
+}
+function clearForm(){
+    $('#ff').form('clear');
+}
+
+var headFieldList = [
+	{field:"field_name", type: 1},
+	{field:"is_allow_null", type: 1},
+	{field:"column_length", type: 1},
+	{field:"dict_sql", type: 1},
+	{field:"order_num", type: 1},
+	{field:"default_value", type: 1},
+	
+	{field:"is_show_list", type: 2},
+	{field:"is_allow_detail", type: 2},
+	{field:"is_allow_update", type: 2},
+	{field:"is_allow_add", type: 2},
+	{field:"is_search", type: 2},
+	{field:"search_type", type: 2},
+	{field:"is_sum", type: 2}
+];
+function showHeadField(type) {
+	type = type || 1;
+	var dg = $("#dg");
+	$.each(headFieldList, function(i, item) {
+		if(item.type == type) {
+			dg.datagrid("showColumn", item.field);
+		}else {
+			dg.datagrid("hideColumn", item.field);
+		}
+	});
+}
+</script>   
+<#include "/common/foot.html"/>

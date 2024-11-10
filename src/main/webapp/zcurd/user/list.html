@@ -1,0 +1,136 @@
+<#include "/common/head.html"/>    
+    <table id="dg"></table>
+    <div id="tb" style="padding:2px 5px;">
+        <div class="wrap_search">
+		        		
+			            	<span class="search_item">
+				            	<span class="item_text">用户名: </span>
+				            	<span class="item_obj">
+				            		<input class="easyui-textbox" type="text" name="user_name" value=""/>
+				            	</span>    
+				            </span>
+		        		
+			        		<span class="search_item search_between">
+				                <span class="item_text">创建时间: </span>
+				                <span class="item_obj">
+				                    <input class="easyui-datebox" name="_start_create_time" value=""/> ～ <input class="easyui-datebox" name="_end_create_time" value=""/>
+				                </span>
+				            </span>
+        </div>
+        <div style="text-align: left; margin:6px;">
+            <a href="#" class="easyui-linkbutton addBtn" iconCls="glyphicon-plus" plain="true" onclick="add()">增加</a>
+            <a href="#" class="easyui-linkbutton updateBtn" iconCls="glyphicon-pencil" plain="true" onclick="update()">编辑</a>
+            <a href="#" class="easyui-linkbutton delBtn" iconCls="glyphicon-remove" plain="true" onclick="del()">删除</a>
+            <div id="searchBtnWrap" style="float:right; padding-right:40px;">
+                <a href="#" class="easyui-linkbutton" iconCls="glyphicon-search" onclick="zcurdSearch(this)">搜索</a>
+                <a href="#" class="easyui-linkbutton" iconCls="glyphicon-repeat">重置</a>
+            </div>
+        </div>
+    </div>
+    
+
+<script type="text/javascript">
+var datagrid = $("#dg");
+
+var dgOptions = {
+        rownumbers:true,
+    	fit:true,
+    	border:false,
+        rownumbers:true,
+    	url:'listData',
+    	method:'post',
+    	toolbar:'#tb',
+    	pageSize: 20,
+    	pagination:true,
+    	multiSort:true,
+        queryParams: getInitParam(),
+        columns: [[
+		         {field:'id', checkbox:true}
+	           	 ,{field:'user_name', title: '用户名', width:120, sortable: true}
+	           	 ,{field:'password', title: '密码', width:120, sortable: true}
+	           	 ,{field:'create_time', title: '创建时间', width:120, sortable: true}
+	           ]]
+	};
+$(function() {
+	datagrid.datagrid(dgOptions);
+});
+
+function zcurdSearch() {
+	var param = zcurdGetParam();
+	datagrid.datagrid("load", {
+		queryParams: param
+	})
+}
+
+function zcurdGetParam() {
+	var param = {};
+	$("#tb :input[name]").each(function(i, item) {
+		if($(item).val()) {
+			param[$(item).attr("name")] = $(item).val();	
+		}
+	});
+	return param;
+}
+
+function getInitParam() {
+	var param = {};
+	$("#tb :input[name]").each(function(i, item) {
+		if($(item).val()) {
+			param["queryParams[" + $(item).attr("name") + "]"] = $(item).val();	
+		}
+	});
+	return param;
+}
+
+var initPara = zcurdGetParam();
+function add() {
+	top.window.subPage.loadCurrDatagrid = function() {
+		showMsg("增加成功！");
+		datagrid.datagrid("load");
+	}
+	top.openWindow("用户管理-增加", "addPage?" + $.param(initPara), {size: '400x300'});
+}
+
+function update() {
+	var rowsSel = datagrid.datagrid("getSelections");
+	if(rowsSel.length != 1) {
+		showWarnMsg("请选择一条数据！");
+		return;
+	}
+	var id = rowsSel[0].id;
+	top.window.subPage.loadCurrDatagrid = function() {
+		showMsg("更新成功！");
+		datagrid.datagrid("load");
+	}
+	top.openWindow("用户管理-编辑", "updatePage?id=" + id, {size: '400x300'});
+}
+
+function del() {
+	var ids = [];
+	$.each(datagrid.datagrid("getSelections"), function(i, item) {
+		ids.push(item.id);
+	});
+	if(ids.length < 1) {
+		showWarnMsg("请选择需要删除的数据！");
+		return;
+	}
+	confirmMsg("确认删除？", function() {
+		$.post("delete", {id: ids}, function(data) {
+			showMsg("删除成功！");
+			datagrid.datagrid("load");
+		});
+	});
+}
+
+function detail() {
+	var rowsSel = datagrid.datagrid("getSelections");
+	if(rowsSel.length != 1) {
+		showWarnMsg("请选择一条数据！");
+		return;
+	}
+	var id = rowsSel[0].id;
+	top.openWindow("用户管理-详情", "detailPage?id=" + id, {size: '400x300'});
+}
+</script>
+<#include "/common/dialogWindow.html"/>
+<#include "/common/foot.html"/>
